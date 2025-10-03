@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Media Storage</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+    }
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .navbar h1 {
+      font-size: 24px;
+    }
+    .navbar-right {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .navbar a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .welcome {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .welcome h2 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .welcome p {
+      color: #666;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .stat-card h3 {
+      color: #666;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+    .stat-card p {
+      font-size: 36px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .action-card {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.2s;
+      text-decoration: none;
+      color: #333;
+    }
+    .action-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .action-card .icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .action-card h3 {
+      margin-bottom: 10px;
+    }
+    .action-card p {
+      color: #666;
+      font-size: 14px;
+    }
+    .recent-media {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .recent-media h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .media-list {
+      display: grid;
+      gap: 15px;
+    }
+    .media-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+    .media-item:hover {
+      background: #f9f9f9;
+    }
+    .media-icon {
+      font-size: 32px;
+      margin-right: 15px;
+    }
+    .media-details {
+      flex: 1;
+    }
+    .media-details h4 {
+      margin-bottom: 5px;
+      color: #333;
+    }
+    .media-details p {
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>🏠 Dashboard</h1>
+    <div class="navbar-right">
+      <span>Welcome, <%= user.username %> (<%= user.role %>)</span>
+      <a href="/media">📁 Media</a>
+      <% if (user.role === 'admin') { %>
+        <a href="/users">👥 Users</a>
+      <% } %>
+      <a href="/auth/logout">🚪 Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="welcome">
+      <h2>Welcome back, <%= user.username %>! 👋</h2>
+      <p>Here's what's happening with your media storage today.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <h3>Total Files</h3>
+        <p><%= stats.totalFiles %></p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Storage</h3>
+        <p><%= (stats.totalSize / 1024 / 1024).toFixed(2) %> MB</p>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="/media" class="action-card">
+        <div class="icon">📤</div>
+        <h3>Upload Files</h3>
+        <p>Upload new media files</p>
+      </a>
+      <a href="/media" class="action-card">
+        <div class="icon">📁</div>
+        <h3>Browse Media</h3>
+        <p>View all your files</p>
+      </a>
+      <% if (user.role === 'admin') { %>
+        <a href="/users" class="action-card">
+          <div class="icon">👥</div>
+          <h3>Manage Users</h3>
+          <p>Add or edit users</p>
+        </a>
+      <% } %>
+    </div>
+
+    <div class="recent-media">
+      <h2>Recent Uploads</h2>
+      <div class="media-list">
+        <% if (recentMedia.length > 0) { %>
+          <% recentMedia.forEach(item => { %>
+            <div class="media-item">
+              <div class="media-icon">
+                <% if (item.mime_type.startsWith('image/')) { %>
+                  🖼️
+                <% } else if (item.mime_type.startsWith('video/')) { %>
+                  🎥
+                <% } else if (item.mime_type.includes('pdf')) { %>
+                  📄
+                <% } else { %>
+                  📎
+                <% } %>
+              </div>
+              <div class="media-details">
+                <h4><%= item.original_name %></h4>
+                <p>
+                  Size: <%= (item.file_size / 1024).toFixed(2) %> KB | 
+                  Uploaded: <%= new Date(item.created_at).toLocaleString() %>
+                </p>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p style="text-align: center; color: #666;">No media files yet. Start by uploading your first file!</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
