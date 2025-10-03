@@ -3,278 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Management</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f5f5;
-    }
-    .navbar {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 15px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .navbar h1 {
-      font-size: 24px;
-    }
-    .navbar-right {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      padding: 8px 15px;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-    .navbar a:hover {
-      background: rgba(255,255,255,0.2);
-    }
-    .container {
-      max-width: 1200px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-    .header h2 {
-      color: #333;
-    }
-    .btn-primary {
-      padding: 10px 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-    }
-    table {
-      width: 100%;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    thead {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    th, td {
-      padding: 15px;
-      text-align: left;
-    }
-    tbody tr:hover {
-      background: #f5f5f5;
-    }
-    .badge {
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .badge-admin {
-      background: #ff6b6b;
-      color: white;
-    }
-    .badge-user {
-      background: #4ecdc4;
-      color: white;
-    }
-    .actions {
-      display: flex;
-      gap: 10px;
-    }
-    .btn-edit {
-      padding: 5px 15px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .btn-delete {
-      padding: 5px 15px;
-      background: #f44336;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal.active {
-      display: flex;
-    }
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .modal-content h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: #555;
-      font-weight: 500;
-    }
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-    .btn-cancel {
-      padding: 10px 20px;
-      background: #999;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .message {
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .success {
-      background: #d4edda;
-      color: #155724;
-    }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-    }
-  </style>
+  <title>User Management - SIJAGO+ AI</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <h1>👥 User Management</h1>
-    <div class="navbar-right">
-      <span>Welcome, <%= user.username %> (<%= user.role %>)</span>
-      <a href="/media">📁 Media</a>
-      <a href="/auth/logout">🚪 Logout</a>
-    </div>
-  </div>
+  <%- include('partials/navbar', { user: user, currentPage: 'users' }) %>
 
   <div class="container">
-    <div class="header">
-      <h2>All Users</h2>
-      <button class="btn-primary" onclick="openCreateModal()">➕ Add New User</button>
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 class="page-title">User Management</h1>
+        <p class="page-subtitle">Manage user accounts and permissions</p>
+      </div>
+      <button class="btn btn-primary btn-lg" onclick="openCreateModal()">
+        <span>➕</span>
+        <span>Add New User</span>
+      </button>
     </div>
 
     <div id="message"></div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Created At</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% users.forEach(u => { %>
+    <div class="table-container">
+      <table class="table">
+        <thead>
           <tr>
-            <td><%= u.id %></td>
-            <td><%= u.username %></td>
-            <td><%= u.email %></td>
-            <td>
-              <span class="badge badge-<%= u.role %>"><%= u.role.toUpperCase() %></span>
-            </td>
-            <td><%= new Date(u.created_at).toLocaleDateString() %></td>
-            <td>
-              <div class="actions">
-                <button class="btn-edit" onclick='openEditModal(<%= JSON.stringify(u) %>)'>Edit</button>
-                <button class="btn-delete" onclick="deleteUser(<%= u.id %>)">Delete</button>
-              </div>
-            </td>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Created At</th>
+            <th>Actions</th>
           </tr>
-        <% }); %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr>
+              <td><%= u.id %></td>
+              <td style="font-weight: 600;"><%= u.username %></td>
+              <td><%= u.email %></td>
+              <td>
+                <span class="badge badge-<%= u.role %>"><%= u.role %></span>
+              </td>
+              <td><%= new Date(u.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+              <td>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="btn btn-success btn-sm" onclick='openEditModal(<%= JSON.stringify(u) %>)'>
+                    ✏️ Edit
+                  </button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteUser(<%= u.id %>)">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Modal Create User -->
   <div id="createModal" class="modal">
     <div class="modal-content">
-      <h2>Create New User</h2>
+      <div class="modal-header">
+        <h2 class="modal-title">Create New User</h2>
+      </div>
       <form id="createForm">
         <div class="form-group">
-          <label for="create_username">Username</label>
-          <input type="text" id="create_username" name="username" required>
+          <label class="form-label" for="create_username">Username</label>
+          <input type="text" id="create_username" name="username" class="form-control" required>
         </div>
         <div class="form-group">
-          <label for="create_email">Email</label>
-          <input type="email" id="create_email" name="email" required>
+          <label class="form-label" for="create_email">Email</label>
+          <input type="email" id="create_email" name="email" class="form-control" required>
         </div>
         <div class="form-group">
-          <label for="create_password">Password</label>
-          <input type="password" id="create_password" name="password" required>
+          <label class="form-label" for="create_password">Password</label>
+          <input type="password" id="create_password" name="password" class="form-control" required>
         </div>
         <div class="form-group">
-          <label for="create_role">Role</label>
-          <select id="create_role" name="role" required>
+          <label class="form-label" for="create_role">Role</label>
+          <select id="create_role" name="role" class="form-select" required>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
-          <button type="submit" class="btn-primary">Create</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create User</button>
         </div>
       </form>
     </div>
@@ -283,31 +99,33 @@
   <!-- Modal Edit User -->
   <div id="editModal" class="modal">
     <div class="modal-content">
-      <h2>Edit User</h2>
+      <div class="modal-header">
+        <h2 class="modal-title">Edit User</h2>
+      </div>
       <form id="editForm">
         <input type="hidden" id="edit_id" name="id">
         <div class="form-group">
-          <label for="edit_username">Username</label>
-          <input type="text" id="edit_username" name="username" required>
+          <label class="form-label" for="edit_username">Username</label>
+          <input type="text" id="edit_username" name="username" class="form-control" required>
         </div>
         <div class="form-group">
-          <label for="edit_email">Email</label>
-          <input type="email" id="edit_email" name="email" required>
+          <label class="form-label" for="edit_email">Email</label>
+          <input type="email" id="edit_email" name="email" class="form-control" required>
         </div>
         <div class="form-group">
-          <label for="edit_password">Password (leave empty to keep current)</label>
-          <input type="password" id="edit_password" name="password">
+          <label class="form-label" for="edit_password">Password</label>
+          <input type="password" id="edit_password" name="password" class="form-control" placeholder="Leave empty to keep current password">
         </div>
         <div class="form-group">
-          <label for="edit_role">Role</label>
-          <select id="edit_role" name="role" required>
+          <label class="form-label" for="edit_role">Role</label>
+          <select id="edit_role" name="role" class="form-select" required>
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-          <button type="submit" class="btn-primary">Update</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update User</button>
         </div>
       </form>
     </div>
@@ -316,7 +134,7 @@
   <script>
     function showMessage(message, type) {
       const messageDiv = document.getElementById('message');
-      messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+      messageDiv.innerHTML = `<div class="alert alert-${type}"><span class="alert-icon">${type === 'success' ? '✅' : '❌'}</span><div class="alert-content">${message}</div></div>`;
       setTimeout(() => {
         messageDiv.innerHTML = '';
       }, 3000);
@@ -364,10 +182,10 @@
           closeCreateModal();
           setTimeout(() => location.reload(), 1000);
         } else {
-          showMessage(result.message, 'error');
+          showMessage(result.message, 'danger');
         }
       } catch (error) {
-        showMessage('Failed to create user!', 'error');
+        showMessage('Failed to create user!', 'danger');
       }
     });
 
@@ -393,10 +211,10 @@
           closeEditModal();
           setTimeout(() => location.reload(), 1000);
         } else {
-          showMessage(result.message, 'error');
+          showMessage(result.message, 'danger');
         }
       } catch (error) {
-        showMessage('Failed to update user!', 'error');
+        showMessage('Failed to update user!', 'danger');
       }
     });
 
@@ -414,10 +232,10 @@
           showMessage('User deleted successfully!', 'success');
           setTimeout(() => location.reload(), 1000);
         } else {
-          showMessage(result.message, 'error');
+          showMessage(result.message, 'danger');
         }
       } catch (error) {
-        showMessage('Failed to delete user!', 'error');
+        showMessage('Failed to delete user!', 'danger');
       }
     }
 

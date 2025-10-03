@@ -1,0 +1,62 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <span class="brand-icon">🤖</span>
+      <span class="brand-text">SIJAGO+ AI</span>
+    </div>
+    
+    <button class="mobile-toggle" id="mobileToggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="navbar-menu" id="navbarMenu">
+      <div class="navbar-links">
+        <!-- <a href="/dashboard" class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-text">Dashboard</span>
+        </a> -->
+        <a href="/media" class="nav-link <%= currentPage === 'media' ? 'active' : '' %>">
+          <span class="nav-icon">📁</span>
+          <span class="nav-text">Upload Media</span>
+        </a>
+        <a href="/categories" class="nav-link <%= currentPage === 'categories' ? 'active' : '' %>">
+          <span class="nav-icon">📂</span>
+          <span class="nav-text">Categories</span>
+        </a>
+        <a href="/video" class="nav-link <%= currentPage === 'video' ? 'active' : '' %>">
+          <span class="nav-icon">🎬</span>
+          <span class="nav-text">Generate Video</span>
+        </a>
+        <% if (user.role === 'admin') { %>
+          <a href="/users" class="nav-link <%= currentPage === 'users' ? 'active' : '' %>">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Users</span>
+          </a>
+        <% } %>
+      </div>
+
+      <div class="navbar-user">
+        <div class="user-info">
+          <div class="user-avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+          <div class="user-details">
+            <div class="user-name"><%= user.username %></div>
+            <div class="user-role"><%= user.role %></div>
+          </div>
+        </div>
+        <a href="/auth/logout" class="logout-btn">
+          <span>🚪</span>
+          <span>Logout</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  document.getElementById('mobileToggle').addEventListener('click', function() {
+    this.classList.toggle('active');
+    document.getElementById('navbarMenu').classList.toggle('active');
+  });
+</script>

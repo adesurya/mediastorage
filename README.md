@@ -1,6 +1,6 @@
-# Media Storage Application
+# SIJAGO+ AI Application
 
-Aplikasi Full Stack untuk manajemen media storage dengan user management menggunakan Node.js, Express, MySQL, dan EJS.
+Aplikasi Full Stack untuk manajemen SIJAGO+ AI dengan user management menggunakan Node.js, Express, MySQL, dan EJS.
 
 ## Fitur Utama
 

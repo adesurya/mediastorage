@@ -16,14 +16,30 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+// Multer configuration yang flexible - support single dan multiple
+const uploadFlexible = multer({ 
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  limits: { 
+    fileSize: 100 * 1024 * 1024 // 100MB per file
+  },
   fileFilter: function (req, file, cb) {
-    // Accept semua jenis file
     cb(null, true);
   }
 });
+
+// Middleware wrapper untuk handle both single and multiple
+const uploadMiddleware = (req, res, next) => {
+  const upload = uploadFlexible.any();
+  upload(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message
+      });
+    }
+    next();
+  });
+};
 
 // Web routes
 router.get('/', authMiddleware, MediaController.index);
@@ -32,12 +48,13 @@ router.get('/dashboard', authMiddleware, MediaController.dashboard);
 // API routes
 router.get('/api', apiAuthMiddleware, MediaController.getAllMedia);
 router.get('/api/:id', apiAuthMiddleware, MediaController.getMediaById);
-router.post('/api/upload', authMiddleware, upload.single('file'), MediaController.uploadMedia);
+router.post('/api/upload', authMiddleware, uploadMiddleware, MediaController.uploadFlexible);
 router.delete('/api/:id', apiAuthMiddleware, MediaController.deleteMedia);
 router.get('/api/download/:id', apiAuthMiddleware, MediaController.downloadMedia);
+router.put('/api/:id/category', authMiddleware, MediaController.updateMediaCategory);
 
-// Alternative routes
-router.post('/upload', authMiddleware, upload.single('file'), MediaController.uploadMedia);
+// Main upload route - support both single and multiple
+router.post('/upload', authMiddleware, uploadMiddleware, MediaController.uploadFlexible);
 router.delete('/delete/:id', authMiddleware, MediaController.deleteMedia);
 
 module.exports = router;

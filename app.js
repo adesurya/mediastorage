@@ -9,14 +9,16 @@ const { initDatabase } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
+const videoRoutes = require('./routes/videoRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 initDatabase();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
 
 // CORS untuk uploads - akses publik
@@ -45,6 +47,10 @@ app.use('/users', userRoutes);
 app.use('/api/users', userRoutes);
 app.use('/media', mediaRoutes);
 app.use('/api/media', mediaRoutes);
+app.use('/video', videoRoutes);
+app.use('/api/video', videoRoutes);
+app.use('/categories', categoryRoutes);
+app.use('/api/categories', categoryRoutes);
 
 app.get('/', (req, res) => {
   req.session.userId ? res.redirect('/dashboard') : res.redirect('/auth/login');

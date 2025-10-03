@@ -36,10 +36,26 @@ const initDatabase = async () => {
       )
     `);
 
+    // Tabel baru untuk kategori/folder
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        user_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_category_per_user (name, user_id)
+      )
+    `);
+
+    // Update tabel media dengan category_id
     await promisePool.query(`
       CREATE TABLE IF NOT EXISTS media (
         id INT PRIMARY KEY AUTO_INCREMENT,
         user_id INT NOT NULL,
+        category_id INT DEFAULT NULL,
         filename VARCHAR(255) NOT NULL,
         original_name VARCHAR(255) NOT NULL,
         file_path VARCHAR(500) NOT NULL,
@@ -47,7 +63,8 @@ const initDatabase = async () => {
         mime_type VARCHAR(100) NOT NULL,
         public_url VARCHAR(500) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
       )
     `);
 

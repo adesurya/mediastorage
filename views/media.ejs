@@ -3,261 +3,400 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Media Storage</title>
+  <title>Upload Media - SIJAGO+ AI</title>
+  <link rel="stylesheet" href="/css/style.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f5f5;
-    }
-    .navbar {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 15px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .navbar h1 {
-      font-size: 24px;
-    }
-    .navbar-right {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      padding: 8px 15px;
-      border-radius: 5px;
-      transition: background 0.3s;
-    }
-    .navbar a:hover {
-      background: rgba(255,255,255,0.2);
-    }
-    .container {
-      max-width: 1200px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    .stat-card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .stat-card h3 {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-    .stat-card p {
-      font-size: 24px;
-      font-weight: bold;
-      color: #667eea;
-    }
-    .upload-section {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
-    }
-    .upload-section h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-    .upload-form {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    input[type="file"] {
-      flex: 1;
-      padding: 10px;
-      border: 2px dashed #ddd;
-      border-radius: 5px;
-    }
-    button {
-      padding: 10px 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.2s;
-    }
-    button:hover {
-      transform: translateY(-2px);
-    }
     .media-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
     }
+
     .media-card {
-      background: white;
-      border-radius: 10px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
     }
+
     .media-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
     }
+
     .media-preview {
       width: 100%;
       height: 200px;
-      background: #f0f0f0;
+      background: var(--gray-100);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      position: relative;
     }
+
     .media-preview img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    .media-preview i {
-      font-size: 60px;
-      color: #999;
+
+    .media-preview-icon {
+      font-size: 4rem;
+      color: var(--gray-400);
     }
+
     .media-info {
-      padding: 15px;
+      padding: 1.25rem;
     }
-    .media-info h3 {
-      font-size: 14px;
-      margin-bottom: 5px;
+
+    .media-title {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 0.5rem;
+      font-size: 0.9375rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .media-info p {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 10px;
+
+    .media-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      margin-bottom: 1rem;
     }
+
+    .media-meta-item {
+      font-size: 0.8125rem;
+      color: var(--gray-500);
+    }
+
     .media-actions {
       display: flex;
-      gap: 10px;
+      gap: 0.5rem;
     }
-    .media-actions a, .media-actions button {
-      flex: 1;
-      padding: 8px;
+
+    .upload-zone {
+      border: 2px dashed var(--gray-300);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
       text-align: center;
-      text-decoration: none;
-      border-radius: 5px;
-      font-size: 12px;
-    }
-    .btn-view {
-      background: #4CAF50;
-      color: white;
-    }
-    .btn-delete {
-      background: #f44336;
-      color: white;
-      border: none;
+      background: var(--gray-50);
+      transition: var(--transition);
       cursor: pointer;
     }
-    .message {
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
+
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: var(--white);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .upload-text {
+      font-size: 1rem;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .upload-hint {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .empty-state {
       text-align: center;
+      padding: 4rem 2rem;
+      color: var(--gray-400);
     }
-    .success {
-      background: #d4edda;
-      color: #155724;
+
+    .empty-state-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
     }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
+
+    .filter-section {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filter-section select {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <h1>📁 Media Storage</h1>
-    <div class="navbar-right">
-      <span>Welcome, <%= user.username %> (<%= user.role %>)</span>
-      <% if (user.role === 'admin') { %>
-        <a href="/users">👥 Users</a>
-      <% } %>
-      <a href="/auth/logout">🚪 Logout</a>
-    </div>
-  </div>
+  <%- include('partials/navbar', { user: user, currentPage: 'media' }) %>
 
   <div class="container">
-    <div class="stats">
+    <div class="page-header">
+      <h1 class="page-title">Media Library</h1>
+      <p class="page-subtitle">Upload and manage your media files</p>
+    </div>
+
+    <div class="stats-grid">
       <div class="stat-card">
-        <h3>Total Files</h3>
-        <p><%= stats.totalFiles %></p>
+        <div class="stat-label">Total Files</div>
+        <div class="stat-value"><%= stats.totalFiles %></div>
       </div>
       <div class="stat-card">
-        <h3>Total Size</h3>
-        <p><%= (stats.totalSize / 1024 / 1024).toFixed(2) %> MB</p>
+        <div class="stat-label">Total Size</div>
+        <div class="stat-value"><%= (stats.totalSize / 1024 / 1024).toFixed(2) %> MB</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Categories</div>
+        <div class="stat-value"><%= categories.length %></div>
       </div>
     </div>
 
-    <div class="upload-section">
-      <h2>Upload New File</h2>
-      <form class="upload-form" id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="file" id="fileInput" required>
-        <button type="submit">Upload</button>
-      </form>
-      <div id="uploadMessage"></div>
-    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>📤</span>
+          Upload New File
+        </h2>
+      </div>
 
-    <h2 style="margin-bottom: 20px;">All Media Files</h2>
-    <div class="media-grid">
-      <% media.forEach(item => { %>
-        <div class="media-card">
-          <div class="media-preview">
-            <% if (item.mime_type.startsWith('image/')) { %>
-              <img src="<%= item.public_url %>" alt="<%= item.original_name %>">
-            <% } else if (item.mime_type.startsWith('video/')) { %>
-              <span>🎥</span>
-            <% } else if (item.mime_type.includes('pdf')) { %>
-              <span>📄</span>
-            <% } else { %>
-              <span>📎</span>
-            <% } %>
-          </div>
-          <div class="media-info">
-            <h3><%= item.original_name %></h3>
-            <p>Uploaded by: <%= item.username %></p>
-            <p>Size: <%= (item.file_size / 1024).toFixed(2) %> KB</p>
-            <div class="media-actions">
-              <a href="<%= item.public_url %>" target="_blank" class="btn-view">View</a>
-              <button class="btn-delete" onclick="deleteMedia(<%= item.id %>)">Delete</button>
-            </div>
-          </div>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="form-label" for="categorySelect">Category (Optional)</label>
+          <select id="categorySelect" name="category_id" class="form-select">
+            <option value="">No Category</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.id %>"><%= cat.name %></option>
+            <% }); %>
+          </select>
         </div>
-      <% }); %>
+        
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">📁</div>
+          <div class="upload-text">Click to upload or drag and drop</div>
+          <div class="upload-hint">Support all file types • Multiple files allowed • Max size: 100MB per file</div>
+          <input type="file" name="files" id="fileInput" multiple required>
+        </div>
+      </form>
+
+      <div id="uploadMessage" style="margin-top: 1rem;"></div>
+    </div>
+
+    <div class="card" style="margin-top: 2rem;">
+      <div class="card-header">
+        <h2 class="card-title">
+          <span>📂</span>
+          All Media Files
+        </h2>
+        <div class="filter-section">
+          <select id="filterCategory" class="form-select" style="min-width: 200px;" onchange="filterByCategory()">
+            <option value="">All Categories</option>
+            <option value="uncategorized">Uncategorized</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.id %>"><%= cat.name %></option>
+            <% }); %>
+          </select>
+          <a href="/categories" class="btn btn-secondary btn-sm">
+            <span>📁</span>
+            <span>Manage Categories</span>
+          </a>
+        </div>
+      </div>
+
+      <% if (media.length > 0) { %>
+        <div class="media-grid">
+          <% media.forEach(item => { %>
+            <div class="media-card" data-category="<%= item.category_id || 'uncategorized' %>">
+              <div class="media-preview">
+                <% if (item.mime_type.startsWith('image/')) { %>
+                  <img src="<%= item.public_url %>" alt="<%= item.original_name %>" loading="lazy">
+                <% } else if (item.mime_type.startsWith('video/')) { %>
+                  <span class="media-preview-icon">🎥</span>
+                <% } else if (item.mime_type.includes('pdf')) { %>
+                  <span class="media-preview-icon">📄</span>
+                <% } else { %>
+                  <span class="media-preview-icon">📎</span>
+                <% } %>
+              </div>
+              <div class="media-info">
+                <div class="media-title" title="<%= item.original_name %>">
+                  <%= item.original_name %>
+                </div>
+                <div class="media-meta">
+                  <div class="media-meta-item">
+                    👤 <%= item.username %>
+                  </div>
+                  <% if (item.category_name) { %>
+                    <div class="media-meta-item">
+                      📁 <%= item.category_name %>
+                    </div>
+                  <% } else { %>
+                    <div class="media-meta-item">
+                      📁 Uncategorized
+                    </div>
+                  <% } %>
+                  <div class="media-meta-item">
+                    💾 <%= (item.file_size / 1024).toFixed(2) %> KB
+                  </div>
+                  <div class="media-meta-item">
+                    📅 <%= new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                  </div>
+                </div>
+                <div class="media-actions">
+                  <a href="<%= item.public_url %>" target="_blank" class="btn btn-success btn-sm" style="flex: 1;">
+                    👁️ View
+                  </a>
+                  <button class="btn btn-danger btn-sm" onclick="deleteMedia(<%= item.id %>)" style="flex: 1;">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <div class="empty-state-icon">📁</div>
+          <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No media files yet</p>
+          <p style="font-size: 0.875rem;">Upload your first file to get started!</p>
+        </div>
+      <% } %>
     </div>
   </div>
 
   <script>
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const messageDiv = document.getElementById('uploadMessage');
+
+    // Filter by category
+    function filterByCategory() {
+      const categoryId = document.getElementById('filterCategory').value;
+      const allCards = document.querySelectorAll('.media-card');
+      
+      allCards.forEach(card => {
+        if (!categoryId) {
+          // Show all
+          card.style.display = 'block';
+        } else {
+          const cardCategory = card.getAttribute('data-category');
+          if (cardCategory === categoryId) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+
+      // Check if any cards are visible
+      const visibleCards = Array.from(allCards).filter(card => card.style.display !== 'none');
+      const mediaGrid = document.querySelector('.media-grid');
+      
+      if (visibleCards.length === 0 && mediaGrid) {
+        if (!document.getElementById('noResultsMessage')) {
+          const noResults = document.createElement('div');
+          noResults.id = 'noResultsMessage';
+          noResults.className = 'empty-state';
+          noResults.innerHTML = `
+            <div class="empty-state-icon">🔍</div>
+            <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No files in this category</p>
+            <p style="font-size: 0.875rem;">Try selecting a different category</p>
+          `;
+          mediaGrid.parentElement.appendChild(noResults);
+        }
+        mediaGrid.style.display = 'none';
+      } else if (mediaGrid) {
+        mediaGrid.style.display = 'grid';
+        const noResults = document.getElementById('noResultsMessage');
+        if (noResults) noResults.remove();
+      }
+    }
+
+    // Check if there's a category filter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryFilter = urlParams.get('category');
+    if (categoryFilter) {
+      document.getElementById('filterCategory').value = categoryFilter;
+      filterByCategory();
+    }
+
+    // Click to upload
+    uploadZone.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        uploadForm.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        uploadForm.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Form submit
+    uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const formData = new FormData(e.target);
-      const messageDiv = document.getElementById('uploadMessage');
+      const formData = new FormData();
+      const categoryId = document.getElementById('categorySelect').value;
+      
+      if (categoryId) {
+        formData.append('category_id', categoryId);
+      }
+      
+      // Add all selected files with 'files' as field name
+      const files = fileInput.files;
+      if (files.length === 0) {
+        messageDiv.innerHTML = '<div class="alert alert-danger"><span class="alert-icon">❌</span><div class="alert-content"><div class="alert-title">Error</div>Please select at least one file</div></div>';
+        return;
+      }
+      
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+      
+      messageDiv.innerHTML = `<div class="alert alert-info"><span class="alert-icon">⏳</span><div class="alert-content">Uploading ${files.length} file(s)...</div></div>`;
       
       try {
         const response = await fetch('/media/upload', {
@@ -268,14 +407,21 @@
         const result = await response.json();
         
         if (result.success) {
-          messageDiv.innerHTML = '<div class="message success">File uploaded successfully!</div>';
-          setTimeout(() => location.reload(), 1000);
+          let message = result.message;
+          if (result.errors && result.errors.length > 0) {
+            message += `<br><small style="color: var(--warning);">Some files failed: ${result.errors.map(e => e.filename).join(', ')}</small>`;
+          }
+          messageDiv.innerHTML = `<div class="alert alert-success"><span class="alert-icon">✅</span><div class="alert-content"><div class="alert-title">Success!</div>${message}</div></div>`;
+          setTimeout(() => location.reload(), 1500);
         } else {
-          messageDiv.innerHTML = `<div class="message error">${result.message}</div>`;
+          messageDiv.innerHTML = `<div class="alert alert-danger"><span class="alert-icon">❌</span><div class="alert-content"><div class="alert-title">Error</div>${result.message}</div></div>`;
         }
       } catch (error) {
-        messageDiv.innerHTML = '<div class="message error">Upload failed!</div>';
+        console.error('Upload error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-danger"><span class="alert-icon">❌</span><div class="alert-content"><div class="alert-title">Error</div>Upload failed!</div></div>';
       }
+      
+      fileInput.value = '';
     });
 
     async function deleteMedia(id) {
@@ -289,7 +435,6 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('File deleted successfully!');
           location.reload();
         } else {
           alert(result.message);
