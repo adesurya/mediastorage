@@ -11,6 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const ideaRoutes = require('./routes/ideaRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,10 @@ app.use('/video', videoRoutes);
 app.use('/api/video', videoRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/idea', ideaRoutes);
+app.use('/api/idea', ideaRoutes);
+
+app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
 
 app.get('/', (req, res) => {
   req.session.userId ? res.redirect('/dashboard') : res.redirect('/auth/login');
@@ -60,6 +65,13 @@ app.get('/dashboard', (req, res) => {
   if (!req.session.userId) return res.redirect('/auth/login');
   res.redirect('/media');
 });
+
+app.use('/previews', (req, res, next) => {
+  res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours cache
+  res.setHeader('Expires', new Date(Date.now() + 86400000).toUTCString());
+  next();
+}, express.static(path.join(__dirname, 'public/previews')));
+
 
 app.listen(PORT, () => {
   console.log(`Server: http://localhost:${PORT}`);

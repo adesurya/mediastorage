@@ -13,10 +13,6 @@
 
     <div class="navbar-menu" id="navbarMenu">
       <div class="navbar-links">
-        <!-- <a href="/dashboard" class="nav-link <%= currentPage === 'dashboard' ? 'active' : '' %>">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-text">Dashboard</span>
-        </a> -->
         <a href="/media" class="nav-link <%= currentPage === 'media' ? 'active' : '' %>">
           <span class="nav-icon">📁</span>
           <span class="nav-text">Upload Media</span>
@@ -28,6 +24,10 @@
         <a href="/video" class="nav-link <%= currentPage === 'video' ? 'active' : '' %>">
           <span class="nav-icon">🎬</span>
           <span class="nav-text">Generate Video</span>
+        </a>
+        <a href="/idea" class="nav-link <%= currentPage === 'idea' ? 'active' : '' %>">
+          <span class="nav-icon">💡</span>
+          <span class="nav-text">Idea Generator</span>
         </a>
         <% if (user.role === 'admin') { %>
           <a href="/users" class="nav-link <%= currentPage === 'users' ? 'active' : '' %>">

@@ -81,6 +81,91 @@
       color: var(--gray-500);
     }
 
+    /* Preview Video Section Styles */
+    .preview-section {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      background: var(--gray-50);
+      border-radius: var(--radius);
+      border: 2px dashed var(--gray-300);
+      transition: var(--transition);
+    }
+
+    .preview-section.active {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .preview-video-container {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .preview-video {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 250px;
+      object-fit: contain;
+    }
+
+    .preview-placeholder {
+      width: 100%;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-200);
+      border-radius: var(--radius);
+      color: var(--gray-500);
+    }
+
+    .preview-placeholder-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.5;
+    }
+
+    .preview-placeholder-text {
+      font-size: 0.875rem;
+    }
+
+    .preview-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .preview-loading.active {
+      display: block;
+    }
+
+    .preview-info {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      color: var(--gray-600);
+    }
+
     .status-card {
       background: var(--white);
       border-radius: var(--radius-lg);
@@ -265,7 +350,36 @@
               </select>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn" style="width: 100%;">
+            <!-- Preview Video Section -->
+            <div class="preview-section" id="previewSection">
+              <div class="preview-header">
+                <span>👁️</span>
+                <span>Style Preview</span>
+              </div>
+              <div class="preview-video-container">
+                <div class="preview-placeholder" id="previewPlaceholder">
+                  <div class="preview-placeholder-icon">🎬</div>
+                  <div class="preview-placeholder-text">Select a style to preview</div>
+                </div>
+                <video 
+                  id="previewVideo" 
+                  class="preview-video" 
+                  controls 
+                  preload="metadata"
+                  style="display: none;"
+                >
+                  Your browser does not support video playback.
+                </video>
+                <div class="preview-loading" id="previewLoading">
+                  <div class="spinner"></div>
+                </div>
+              </div>
+              <div class="preview-info" id="previewInfo" style="display: none;">
+                <strong>Preview:</strong> This is how your final video layout will look with your selected clips.
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn" style="width: 100%; margin-top: 1rem;">
               <span>🎬</span>
               <span>Generate Video</span>
             </button>
@@ -277,6 +391,7 @@
           <ul style="margin-left: 1.25rem; font-size: 0.8125rem; color: var(--gray-600); line-height: 1.6;">
             <li style="margin-bottom: 0.5rem;">Select exactly 12 video clips from your library</li>
             <li style="margin-bottom: 0.5rem;">Choose a video style template</li>
+            <li style="margin-bottom: 0.5rem;">Preview the style before generating</li>
             <li style="margin-bottom: 0.5rem;">Click Generate Video to start rendering</li>
             <li>Download the video within 24 hours</li>
           </ul>
@@ -332,6 +447,98 @@
   <script>
     let checkInterval;
     let currentRenderId;
+    
+    // Video preview cache
+    const videoCache = {};
+    const STYLE_PREVIEWS = {
+      'style1': '/previews/style1-preview.mp4',
+      'style2': '/previews/style2-preview.mp4',
+      'style3': '/previews/style3-preview.mp4'
+    };
+
+    // Preload videos on page load for better performance
+    function preloadVideos() {
+      Object.keys(STYLE_PREVIEWS).forEach(styleKey => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.src = STYLE_PREVIEWS[styleKey];
+        videoCache[styleKey] = video;
+      });
+    }
+
+    // Initialize preloading
+    window.addEventListener('load', preloadVideos);
+
+    // Style selector change handler
+    const styleSelect = document.getElementById('styleSelect');
+    const previewSection = document.getElementById('previewSection');
+    const previewVideo = document.getElementById('previewVideo');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const previewLoading = document.getElementById('previewLoading');
+    const previewInfo = document.getElementById('previewInfo');
+
+    styleSelect.addEventListener('change', function() {
+      const selectedStyle = this.value;
+      
+      if (selectedStyle && STYLE_PREVIEWS[selectedStyle]) {
+        showVideoPreview(selectedStyle);
+      } else {
+        hideVideoPreview();
+      }
+    });
+
+    function showVideoPreview(styleKey) {
+      previewSection.classList.add('active');
+      previewPlaceholder.style.display = 'none';
+      previewLoading.classList.add('active');
+      
+      const videoSrc = STYLE_PREVIEWS[styleKey];
+      
+      // Use cached video if available
+      if (videoCache[styleKey] && videoCache[styleKey].readyState >= 2) {
+        loadPreviewVideo(videoSrc);
+      } else {
+        // Load video with loading indicator
+        previewVideo.src = videoSrc;
+        previewVideo.load();
+        
+        previewVideo.addEventListener('loadedmetadata', function onLoad() {
+          loadPreviewVideo(videoSrc);
+          previewVideo.removeEventListener('loadedmetadata', onLoad);
+        }, { once: true });
+        
+        previewVideo.addEventListener('error', function onError() {
+          handlePreviewError();
+          previewVideo.removeEventListener('error', onError);
+        }, { once: true });
+      }
+    }
+
+    function loadPreviewVideo(src) {
+      previewVideo.src = src;
+      previewVideo.style.display = 'block';
+      previewLoading.classList.remove('active');
+      previewInfo.style.display = 'block';
+    }
+
+    function hideVideoPreview() {
+      previewSection.classList.remove('active');
+      previewVideo.style.display = 'none';
+      previewVideo.pause();
+      previewVideo.currentTime = 0;
+      previewPlaceholder.style.display = 'flex';
+      previewInfo.style.display = 'none';
+      previewLoading.classList.remove('active');
+    }
+
+    function handlePreviewError() {
+      previewLoading.classList.remove('active');
+      previewPlaceholder.innerHTML = `
+        <div class="preview-placeholder-icon">❌</div>
+        <div class="preview-placeholder-text">Preview not available</div>
+      `;
+      previewPlaceholder.style.display = 'flex';
+    }
 
     // Highlight selected clips
     for(let i = 1; i <= 12; i++) {
@@ -510,6 +717,9 @@
         const item = document.getElementById(`clip-item-${i}`);
         if (item) item.classList.remove('selected');
       }
+      
+      // Reset preview
+      hideVideoPreview();
     }
   </script>
 </body>

@@ -36,7 +36,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Tabel baru untuk kategori/folder
     await promisePool.query(`
       CREATE TABLE IF NOT EXISTS categories (
         id INT PRIMARY KEY AUTO_INCREMENT,
@@ -50,7 +49,6 @@ const initDatabase = async () => {
       )
     `);
 
-    // Update tabel media dengan category_id
     await promisePool.query(`
       CREATE TABLE IF NOT EXISTS media (
         id INT PRIMARY KEY AUTO_INCREMENT,
@@ -65,6 +63,31 @@ const initDatabase = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+      )
+    `);
+
+    // Tabel untuk Idea Feature
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS idea_chats (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_created (user_id, created_at DESC)
+      )
+    `);
+
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS idea_messages (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        chat_id INT NOT NULL,
+        role ENUM('user', 'assistant') NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (chat_id) REFERENCES idea_chats(id) ON DELETE CASCADE,
+        INDEX idx_chat_created (chat_id, created_at ASC)
       )
     `);
 
