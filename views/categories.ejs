@@ -6,6 +6,33 @@
   <title>Categories - SIJAGO+ AI</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
     .categories-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -70,66 +97,81 @@
       gap: 0.5rem;
       margin-top: 1rem;
     }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .categories-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <%- include('partials/navbar', { user: user, currentPage: 'categories' }) %>
+  <%- include('partials/sidebar', { user: user, currentPage: 'categories' }) %>
 
-  <div class="container">
-    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <h1 class="page-title">Media Categories</h1>
-        <p class="page-subtitle">Organize your media files into categories</p>
-      </div>
-      <button class="btn btn-primary btn-lg" onclick="openCreateModal()">
-        <span>📁</span>
-        <span>New Category</span>
-      </button>
-    </div>
-
-    <div id="message"></div>
-
-    <% if (categories.length > 0) { %>
-      <div class="categories-grid">
-        <% categories.forEach(cat => { %>
-          <div class="category-card">
-            <div class="category-icon">📁</div>
-            <div class="category-name"><%= cat.name %></div>
-            <% if (cat.description) { %>
-              <div class="category-description"><%= cat.description %></div>
-            <% } %>
-            <div class="category-stats">
-              <div class="category-stat">
-                <strong><%= cat.media_count %></strong> files
-              </div>
-              <div class="category-stat">
-                By <%= cat.username %>
-              </div>
-            </div>
-            <div class="category-actions">
-              <button class="btn btn-success btn-sm" style="flex: 1;" onclick="viewCategory(<%= cat.id %>)">
-                👁️ View
-              </button>
-              <button class="btn btn-primary btn-sm" onclick='openEditModal(<%= JSON.stringify(cat) %>)'>
-                ✏️ Edit
-              </button>
-              <button class="btn btn-danger btn-sm" onclick="deleteCategory(<%= cat.id %>)">
-                🗑️
-              </button>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-    <% } else { %>
-      <div class="card" style="margin-top: 2rem;">
-        <div style="text-align: center; padding: 3rem; color: var(--gray-400);">
-          <div style="font-size: 4rem; margin-bottom: 1rem;">📁</div>
-          <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No categories yet</p>
-          <p style="font-size: 0.875rem;">Create your first category to organize your media files</p>
+    <div class="content-wrapper">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Media Categories</h1>
+          <p class="page-subtitle">Organize your media files into categories</p>
         </div>
+        <button class="btn btn-primary btn-lg" onclick="openCreateModal()">
+          <span>📁</span>
+          <span>New Category</span>
+        </button>
       </div>
-    <% } %>
-  </div>
+
+      <div id="message"></div>
+
+      <% if (categories.length > 0) { %>
+        <div class="categories-grid">
+          <% categories.forEach(cat => { %>
+            <div class="category-card">
+              <div class="category-icon">📁</div>
+              <div class="category-name"><%= cat.name %></div>
+              <% if (cat.description) { %>
+                <div class="category-description"><%= cat.description %></div>
+              <% } %>
+              <div class="category-stats">
+                <div class="category-stat">
+                  <strong><%= cat.media_count %></strong> files
+                </div>
+                <div class="category-stat">
+                  By <%= cat.username %>
+                </div>
+              </div>
+              <div class="category-actions">
+                <button class="btn btn-success btn-sm" style="flex: 1;" onclick="viewCategory(<%= cat.id %>)">
+                  👁️ View
+                </button>
+                <button class="btn btn-primary btn-sm" onclick='openEditModal(<%= JSON.stringify(cat) %>)'>
+                  ✏️ Edit
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteCategory(<%= cat.id %>)">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div class="card" style="margin-top: 2rem;">
+          <div style="text-align: center; padding: 3rem; color: var(--gray-400);">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📁</div>
+            <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No categories yet</p>
+            <p style="font-size: 0.875rem;">Create your first category to organize your media files</p>
+          </div>
+        </div>
+      <% } %>
+    </div>
 
   <!-- Modal Create Category -->
   <div id="createModal" class="modal">
@@ -177,6 +219,8 @@
       </form>
     </div>
   </div>
+
+  <%- include('partials/footer') %>
 
   <script>
     function showMessage(message, type) {

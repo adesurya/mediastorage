@@ -6,6 +6,28 @@
   <title>Upload Media - SIJAGO+ AI</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
     .media-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
@@ -213,7 +235,6 @@
       max-width: 300px;
     }
 
-    /* Progress bar for upload */
     .upload-progress {
       display: none;
       margin-top: 1rem;
@@ -264,6 +285,10 @@
     }
 
     @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
       .media-grid {
         grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
         gap: 1rem;
@@ -300,169 +325,157 @@
         grid-template-columns: 1fr;
       }
     }
-
-    @media (max-width: 480px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .media-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .page-header {
-        text-align: center;
-      }
-    }
   </style>
 </head>
 <body>
-  <%- include('partials/navbar', { user: user, currentPage: 'media' }) %>
+  <%- include('partials/sidebar', { user: user, currentPage: 'media' }) %>
 
-  <div class="container">
-    <div class="page-header">
-      <h1 class="page-title">Media Library</h1>
-      <p class="page-subtitle">Upload and manage your media files</p>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Files</div>
-        <div class="stat-value"><%= stats.totalFiles %></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Total Size</div>
-        <div class="stat-value"><%= (stats.totalSize / 1024 / 1024).toFixed(2) %> MB</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Categories</div>
-        <div class="stat-value"><%= categories.length %></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span>📤</span>
-          <span>Upload New File</span>
-        </h2>
+    <div class="content-wrapper">
+      <div class="page-header">
+        <h1 class="page-title">Media Library</h1>
+        <p class="page-subtitle">Upload and manage your media files</p>
       </div>
 
-      <form id="uploadForm" enctype="multipart/form-data">
-        <div class="form-group">
-          <label class="form-label" for="categorySelect">Category (Optional)</label>
-          <select id="categorySelect" name="category_id" class="form-select">
-            <option value="">No Category</option>
-            <% categories.forEach(cat => { %>
-              <option value="<%= cat.id %>"><%= cat.name %></option>
-            <% }); %>
-          </select>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Files</div>
+          <div class="stat-value"><%= stats.totalFiles %></div>
         </div>
-        
-        <div class="upload-zone" id="uploadZone">
-          <div class="upload-icon">📁</div>
-          <div class="upload-text">Click to upload or drag and drop</div>
-          <div class="upload-hint">Support all file types • Multiple files allowed • Max size: 100MB per file</div>
-          <input type="file" name="files" id="fileInput" multiple required>
+        <div class="stat-card">
+          <div class="stat-label">Total Size</div>
+          <div class="stat-value"><%= (stats.totalSize / 1024 / 1024).toFixed(2) %> MB</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Categories</div>
+          <div class="stat-value"><%= categories.length %></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>📤</span>
+            <span>Upload New File</span>
+          </h2>
         </div>
 
-        <div class="upload-progress" id="uploadProgress">
-          <div class="progress-bar-container">
-            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+        <form id="uploadForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label class="form-label" for="categorySelect">Category (Optional)</label>
+            <select id="categorySelect" name="category_id" class="form-select">
+              <option value="">No Category</option>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat.id %>"><%= cat.name %></option>
+              <% }); %>
+            </select>
           </div>
-          <div class="progress-text" id="progressText">Uploading...</div>
-        </div>
-      </form>
+          
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-hint">Support all file types • Multiple files allowed • Max size: 100MB per file</div>
+            <input type="file" name="files" id="fileInput" multiple required>
+          </div>
 
-      <div id="uploadMessage" style="margin-top: 1rem;"></div>
-    </div>
+          <div class="upload-progress" id="uploadProgress">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">Uploading...</div>
+          </div>
+        </form>
 
-    <div class="card" style="margin-top: 2rem;">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span>📂</span>
-          <span>All Media Files</span>
-        </h2>
-        <div class="filter-section">
-          <select id="filterCategory" class="form-select" onchange="filterByCategory()">
-            <option value="">All Categories</option>
-            <option value="uncategorized">Uncategorized</option>
-            <% categories.forEach(cat => { %>
-              <option value="<%= cat.id %>"><%= cat.name %></option>
-            <% }); %>
-          </select>
-          <a href="/categories" class="btn btn-secondary btn-sm">
-            <span>📁</span>
-            <span>Manage Categories</span>
-          </a>
-        </div>
+        <div id="uploadMessage" style="margin-top: 1rem;"></div>
       </div>
 
-      <% if (media.length > 0) { %>
-        <div class="media-grid">
-          <% media.forEach(item => { %>
-            <div class="media-card" data-category="<%= item.category_id || 'uncategorized' %>">
-              <div class="media-preview">
-                <% if (item.mime_type.startsWith('image/')) { %>
-                  <img src="<%= item.public_url %>" alt="<%= item.original_name %>" loading="lazy">
-                <% } else if (item.mime_type.startsWith('video/')) { %>
-                  <span class="media-preview-icon">🎥</span>
-                <% } else if (item.mime_type.includes('pdf')) { %>
-                  <span class="media-preview-icon">📄</span>
-                <% } else { %>
-                  <span class="media-preview-icon">📎</span>
-                <% } %>
-              </div>
-              <div class="media-info">
-                <div class="media-title" title="<%= item.original_name %>">
-                  <%= item.original_name %>
-                </div>
-                <div class="media-meta">
-                  <div class="media-meta-item">
-                    <span>👤</span>
-                    <span><%= item.username %></span>
-                  </div>
-                  <% if (item.category_name) { %>
-                    <div class="media-meta-item">
-                      <span>📁</span>
-                      <span><%= item.category_name %></span>
-                    </div>
+      <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>📂</span>
+            <span>All Media Files</span>
+          </h2>
+          <div class="filter-section">
+            <select id="filterCategory" class="form-select" onchange="filterByCategory()">
+              <option value="">All Categories</option>
+              <option value="uncategorized">Uncategorized</option>
+              <% categories.forEach(cat => { %>
+                <option value="<%= cat.id %>"><%= cat.name %></option>
+              <% }); %>
+            </select>
+            <a href="/categories" class="btn btn-secondary btn-sm">
+              <span>📁</span>
+              <span>Manage Categories</span>
+            </a>
+          </div>
+        </div>
+
+        <% if (media.length > 0) { %>
+          <div class="media-grid">
+            <% media.forEach(item => { %>
+              <div class="media-card" data-category="<%= item.category_id || 'uncategorized' %>">
+                <div class="media-preview">
+                  <% if (item.mime_type.startsWith('image/')) { %>
+                    <img src="<%= item.public_url %>" alt="<%= item.original_name %>" loading="lazy">
+                  <% } else if (item.mime_type.startsWith('video/')) { %>
+                    <span class="media-preview-icon">🎥</span>
+                  <% } else if (item.mime_type.includes('pdf')) { %>
+                    <span class="media-preview-icon">📄</span>
                   <% } else { %>
-                    <div class="media-meta-item">
-                      <span>📁</span>
-                      <span>Uncategorized</span>
-                    </div>
+                    <span class="media-preview-icon">📎</span>
                   <% } %>
-                  <div class="media-meta-item">
-                    <span>💾</span>
-                    <span><%= (item.file_size / 1024).toFixed(2) %> KB</span>
-                  </div>
-                  <div class="media-meta-item">
-                    <span>📅</span>
-                    <span><%= new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
-                  </div>
                 </div>
-                <div class="media-actions">
-                  <a href="<%= item.public_url %>" target="_blank" class="btn btn-success btn-sm">
-                    👁️ View
-                  </a>
-                  <button class="btn btn-danger btn-sm" onclick="deleteMedia(<%= item.id %>)">
-                    🗑️ Delete
-                  </button>
+                <div class="media-info">
+                  <div class="media-title" title="<%= item.original_name %>">
+                    <%= item.original_name %>
+                  </div>
+                  <div class="media-meta">
+                    <div class="media-meta-item">
+                      <span>👤</span>
+                      <span><%= item.username %></span>
+                    </div>
+                    <% if (item.category_name) { %>
+                      <div class="media-meta-item">
+                        <span>📁</span>
+                        <span><%= item.category_name %></span>
+                      </div>
+                    <% } else { %>
+                      <div class="media-meta-item">
+                        <span>📁</span>
+                        <span>Uncategorized</span>
+                      </div>
+                    <% } %>
+                    <div class="media-meta-item">
+                      <span>💾</span>
+                      <span><%= (item.file_size / 1024).toFixed(2) %> KB</span>
+                    </div>
+                    <div class="media-meta-item">
+                      <span>📅</span>
+                      <span><%= new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                    </div>
+                  </div>
+                  <div class="media-actions">
+                    <a href="<%= item.public_url %>" target="_blank" class="btn btn-success btn-sm">
+                      👁️ View
+                    </a>
+                    <button class="btn btn-danger btn-sm" onclick="deleteMedia(<%= item.id %>)">
+                      🗑️ Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          <% }); %>
-        </div>
-      <% } else { %>
-        <div class="empty-state">
-          <div class="empty-state-icon">📁</div>
-          <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No media files yet</p>
-          <p style="font-size: 0.875rem;">Upload your first file to get started!</p>
-        </div>
-      <% } %>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">
+            <div class="empty-state-icon">📁</div>
+            <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No media files yet</p>
+            <p style="font-size: 0.875rem;">Upload your first file to get started!</p>
+          </div>
+        <% } %>
+      </div>
     </div>
-  </div>
+
+  <%- include('partials/footer') %>
 
   <script>
     const uploadZone = document.getElementById('uploadZone');
@@ -473,7 +486,6 @@
     const progressBarFill = document.getElementById('progressBarFill');
     const progressText = document.getElementById('progressText');
 
-    // Filter by category
     function filterByCategory() {
       const categoryId = document.getElementById('filterCategory').value;
       const allCards = document.querySelectorAll('.media-card');
@@ -577,7 +589,6 @@
       progressText.textContent = `Uploading ${files.length} file(s)...`;
       messageDiv.innerHTML = '';
       
-      // Simulate progress
       let progress = 0;
       const progressInterval = setInterval(() => {
         if (progress < 90) {

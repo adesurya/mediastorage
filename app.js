@@ -21,6 +21,8 @@ initDatabase();
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // CORS untuk uploads - akses publik
 app.use('/uploads', cors({

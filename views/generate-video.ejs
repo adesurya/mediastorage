@@ -6,6 +6,28 @@
   <title>Generate Video - SIJAGO+ AI</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
     .grid-layout {
       display: grid;
       grid-template-columns: 1fr 400px;
@@ -81,7 +103,6 @@
       color: var(--gray-500);
     }
 
-    /* Preview Video Section Styles */
     .preview-section {
       margin-top: 1.5rem;
       padding: 1.5rem;
@@ -263,192 +284,198 @@
         grid-template-columns: 1fr;
       }
     }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <%- include('partials/navbar', { user: user, currentPage: 'video' }) %>
+  <%- include('partials/sidebar', { user: user, currentPage: 'video' }) %>
 
-  <div class="container">
-    <div class="page-header">
-      <h1 class="page-title">Generate Video</h1>
-      <p class="page-subtitle">Create stunning videos from your uploaded clips</p>
-    </div>
-
-    <div class="alert alert-warning">
-      <span class="alert-icon">⚠️</span>
-      <div class="alert-content">
-        <div class="alert-title">Important Notice</div>
-        Generated videos will be stored for only 24 hours. Please download your video immediately after generation.
+    <div class="content-wrapper">
+      <div class="page-header">
+        <h1 class="page-title">Generate Video</h1>
+        <p class="page-subtitle">Create stunning videos from your uploaded clips</p>
       </div>
-    </div>
 
-    <div id="generateForm" class="grid-layout">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">
-            <span>🎨</span>
-            Select Video Clips (12 Required)
-          </h2>
-          <select id="categoryFilter" class="form-select" style="width: 200px;" onchange="filterVideosByCategory()">
-            <option value="">All Categories</option>
-            <% const uniqueCategories = [...new Set(videos.map(v => v.category_name).filter(Boolean))]; %>
-            <% uniqueCategories.forEach(catName => { %>
-              <option value="<%= catName %>"><%= catName %></option>
-            <% }); %>
-          </select>
+      <div class="alert alert-warning">
+        <span class="alert-icon">⚠️</span>
+        <div class="alert-content">
+          <div class="alert-title">Important Notice</div>
+          Generated videos will be stored for only 24 hours. Please download your video immediately after generation.
         </div>
-
-        <% if (videos.length > 0) { %>
-          <div class="clips-grid" id="clipsContainer">
-            <% for(let i = 1; i <= 12; i++) { %>
-              <div class="clip-item" id="clip-item-<%= i %>">
-                <div class="clip-number"><%= i %></div>
-                <div class="clip-select">
-                  <select id="clip<%= i %>" name="clip<%= i %>" class="form-select clip-selector" required>
-                    <option value="">Select video for clip <%= i %></option>
-                    <% videos.forEach(video => { %>
-                      <option value="<%= video.public_url %>" data-category="<%= video.category_name || '' %>">
-                        <%= video.category_name ? '[' + video.category_name + '] ' : '' %><%= video.original_name %>
-                      </option>
-                    <% }); %>
-                  </select>
-                </div>
-                <div class="clip-preview">🎥</div>
-              </div>
-            <% } %>
-          </div>
-        <% } else { %>
-          <div class="empty-clips">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">🎥</div>
-            <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No video files available</p>
-            <p style="font-size: 0.875rem;">Please upload video files first before generating.</p>
-            <a href="/media" class="btn btn-primary" style="margin-top: 1rem;">
-              <span>📤</span>
-              <span>Upload Videos</span>
-            </a>
-          </div>
-        <% } %>
       </div>
 
-      <div>
+      <div id="generateForm" class="grid-layout">
         <div class="card">
           <div class="card-header">
             <h2 class="card-title">
-              <span>⚙️</span>
-              Video Settings
+              <span>🎨</span>
+              Select Video Clips (12 Required)
             </h2>
+            <select id="categoryFilter" class="form-select" style="width: 200px;" onchange="filterVideosByCategory()">
+              <option value="">All Categories</option>
+              <% const uniqueCategories = [...new Set(videos.map(v => v.category_name).filter(Boolean))]; %>
+              <% uniqueCategories.forEach(catName => { %>
+                <option value="<%= catName %>"><%= catName %></option>
+              <% }); %>
+            </select>
           </div>
-          
-          <form id="videoForm">
-            <div class="form-group">
-              <label class="form-label" for="styleSelect">Video Style</label>
-              <select id="styleSelect" name="style" class="form-select" required>
-                <option value="">Choose a style</option>
-                <% styles.forEach((style, index) => { %>
-                  <option value="<%= style %>">Style <%= index + 1 %></option>
-                <% }); %>
-              </select>
-            </div>
 
-            <!-- Preview Video Section -->
-            <div class="preview-section" id="previewSection">
-              <div class="preview-header">
-                <span>👁️</span>
-                <span>Style Preview</span>
-              </div>
-              <div class="preview-video-container">
-                <div class="preview-placeholder" id="previewPlaceholder">
-                  <div class="preview-placeholder-icon">🎬</div>
-                  <div class="preview-placeholder-text">Select a style to preview</div>
+          <% if (videos.length > 0) { %>
+            <div class="clips-grid" id="clipsContainer">
+              <% for(let i = 1; i <= 12; i++) { %>
+                <div class="clip-item" id="clip-item-<%= i %>">
+                  <div class="clip-number"><%= i %></div>
+                  <div class="clip-select">
+                    <select id="clip<%= i %>" name="clip<%= i %>" class="form-select clip-selector" required>
+                      <option value="">Select video for clip <%= i %></option>
+                      <% videos.forEach(video => { %>
+                        <option value="<%= video.public_url %>" data-category="<%= video.category_name || '' %>">
+                          <%= video.category_name ? '[' + video.category_name + '] ' : '' %><%= video.original_name %>
+                        </option>
+                      <% }); %>
+                    </select>
+                  </div>
+                  <div class="clip-preview">🎥</div>
                 </div>
-                <video 
-                  id="previewVideo" 
-                  class="preview-video" 
-                  controls 
-                  preload="metadata"
-                  style="display: none;"
-                >
-                  Your browser does not support video playback.
-                </video>
-                <div class="preview-loading" id="previewLoading">
-                  <div class="spinner"></div>
-                </div>
-              </div>
-              <div class="preview-info" id="previewInfo" style="display: none;">
-                <strong>Preview:</strong> This is how your final video layout will look with your selected clips.
-              </div>
+              <% } %>
             </div>
-
-            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn" style="width: 100%; margin-top: 1rem;">
-              <span>🎬</span>
-              <span>Generate Video</span>
-            </button>
-          </form>
+          <% } else { %>
+            <div class="empty-clips">
+              <div style="font-size: 4rem; margin-bottom: 1rem;">🎥</div>
+              <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No video files available</p>
+              <p style="font-size: 0.875rem;">Please upload video files first before generating.</p>
+              <a href="/media" class="btn btn-primary" style="margin-top: 1rem;">
+                <span>📤</span>
+                <span>Upload Videos</span>
+              </a>
+            </div>
+          <% } %>
         </div>
 
-        <div class="card" style="margin-top: 1rem; background: var(--gray-50);">
-          <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--gray-700); margin-bottom: 0.75rem;">Instructions</h4>
-          <ul style="margin-left: 1.25rem; font-size: 0.8125rem; color: var(--gray-600); line-height: 1.6;">
-            <li style="margin-bottom: 0.5rem;">Select exactly 12 video clips from your library</li>
-            <li style="margin-bottom: 0.5rem;">Choose a video style template</li>
-            <li style="margin-bottom: 0.5rem;">Preview the style before generating</li>
-            <li style="margin-bottom: 0.5rem;">Click Generate Video to start rendering</li>
-            <li>Download the video within 24 hours</li>
-          </ul>
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <span>⚙️</span>
+                Video Settings
+              </h2>
+            </div>
+            
+            <form id="videoForm">
+              <div class="form-group">
+                <label class="form-label" for="styleSelect">Video Style</label>
+                <select id="styleSelect" name="style" class="form-select" required>
+                  <option value="">Choose a style</option>
+                  <% styles.forEach((style, index) => { %>
+                    <option value="<%= style %>">Style <%= index + 1 %></option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="preview-section" id="previewSection">
+                <div class="preview-header">
+                  <span>👁️</span>
+                  <span>Style Preview</span>
+                </div>
+                <div class="preview-video-container">
+                  <div class="preview-placeholder" id="previewPlaceholder">
+                    <div class="preview-placeholder-icon">🎬</div>
+                    <div class="preview-placeholder-text">Select a style to preview</div>
+                  </div>
+                  <video 
+                    id="previewVideo" 
+                    class="preview-video" 
+                    controls 
+                    preload="metadata"
+                    style="display: none;"
+                  >
+                    Your browser does not support video playback.
+                  </video>
+                  <div class="preview-loading" id="previewLoading">
+                    <div class="spinner"></div>
+                  </div>
+                </div>
+                <div class="preview-info" id="previewInfo" style="display: none;">
+                  <strong>Preview:</strong> This is how your final video layout will look with your selected clips.
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg" id="generateBtn" style="width: 100%; margin-top: 1rem;">
+                <span>🎬</span>
+                <span>Generate Video</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="card" style="margin-top: 1rem; background: var(--gray-50);">
+            <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--gray-700); margin-bottom: 0.75rem;">Instructions</h4>
+            <ul style="margin-left: 1.25rem; font-size: 0.8125rem; color: var(--gray-600); line-height: 1.6;">
+              <li style="margin-bottom: 0.5rem;">Select exactly 12 video clips from your library</li>
+              <li style="margin-bottom: 0.5rem;">Choose a video style template</li>
+              <li style="margin-bottom: 0.5rem;">Preview the style before generating</li>
+              <li style="margin-bottom: 0.5rem;">Click Generate Video to start rendering</li>
+              <li>Download the video within 24 hours</li>
+            </ul>
+          </div>
         </div>
+      </div>
+
+      <div id="statusCard" class="status-card">
+        <div class="status-header">
+          <div id="statusIcon" class="status-icon">⏳</div>
+          <h3 id="statusTitle">Processing Your Video</h3>
+          <p id="statusMessage">Please wait while we generate your video...</p>
+        </div>
+
+        <div id="progressSection">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="status-details" id="statusDetails">
+          <div class="status-item">
+            <span class="status-label">Render ID</span>
+            <span class="status-value" id="renderId">-</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Status</span>
+            <span class="status-value">
+              <span class="badge badge-warning" id="statusBadge">queued</span>
+            </span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Duration</span>
+            <span class="status-value" id="duration">-</span>
+          </div>
+        </div>
+
+        <div id="videoPreviewSection" style="display: none;">
+          <video id="videoPreview" class="video-preview" controls></video>
+          <a id="downloadBtn" class="btn btn-success btn-lg" download style="width: 100%; text-decoration: none;">
+            <span>📥</span>
+            <span>Download Video</span>
+          </a>
+        </div>
+
+        <button class="btn btn-primary btn-lg" onclick="resetForm()" style="width: 100%; margin-top: 1rem;">
+          <span>🎬</span>
+          <span>Generate Another Video</span>
+        </button>
       </div>
     </div>
 
-    <div id="statusCard" class="status-card">
-      <div class="status-header">
-        <div id="statusIcon" class="status-icon">⏳</div>
-        <h3 id="statusTitle">Processing Your Video</h3>
-        <p id="statusMessage">Please wait while we generate your video...</p>
-      </div>
-
-      <div id="progressSection">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-        </div>
-      </div>
-
-      <div class="status-details" id="statusDetails">
-        <div class="status-item">
-          <span class="status-label">Render ID</span>
-          <span class="status-value" id="renderId">-</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Status</span>
-          <span class="status-value">
-            <span class="badge badge-warning" id="statusBadge">queued</span>
-          </span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Duration</span>
-          <span class="status-value" id="duration">-</span>
-        </div>
-      </div>
-
-      <div id="videoPreviewSection" style="display: none;">
-        <video id="videoPreview" class="video-preview" controls></video>
-        <a id="downloadBtn" class="btn btn-success btn-lg" download style="width: 100%; text-decoration: none;">
-          <span>📥</span>
-          <span>Download Video</span>
-        </a>
-      </div>
-
-      <button class="btn btn-primary btn-lg" onclick="resetForm()" style="width: 100%; margin-top: 1rem;">
-        <span>🎬</span>
-        <span>Generate Another Video</span>
-      </button>
-    </div>
-  </div>
+  <%- include('partials/footer') %>
 
   <script>
     let checkInterval;
     let currentRenderId;
     
-    // Video preview cache
     const videoCache = {};
     const STYLE_PREVIEWS = {
       'style1': '/previews/style1-preview.mp4',
@@ -456,7 +483,6 @@
       'style3': '/previews/style3-preview.mp4'
     };
 
-    // Preload videos on page load for better performance
     function preloadVideos() {
       Object.keys(STYLE_PREVIEWS).forEach(styleKey => {
         const video = document.createElement('video');
@@ -466,10 +492,8 @@
       });
     }
 
-    // Initialize preloading
     window.addEventListener('load', preloadVideos);
 
-    // Style selector change handler
     const styleSelect = document.getElementById('styleSelect');
     const previewSection = document.getElementById('previewSection');
     const previewVideo = document.getElementById('previewVideo');
@@ -494,11 +518,9 @@
       
       const videoSrc = STYLE_PREVIEWS[styleKey];
       
-      // Use cached video if available
       if (videoCache[styleKey] && videoCache[styleKey].readyState >= 2) {
         loadPreviewVideo(videoSrc);
       } else {
-        // Load video with loading indicator
         previewVideo.src = videoSrc;
         previewVideo.load();
         
@@ -540,7 +562,6 @@
       previewPlaceholder.style.display = 'flex';
     }
 
-    // Highlight selected clips
     for(let i = 1; i <= 12; i++) {
       const selectElement = document.getElementById(`clip${i}`);
       if (selectElement) {
@@ -563,7 +584,6 @@
         const styleId = document.getElementById('styleSelect').value;
         const clips = [];
         
-        // Collect all clip URLs
         for(let i = 1; i <= 12; i++) {
           const clipUrl = document.getElementById(`clip${i}`)?.value;
           if(!clipUrl) {
@@ -573,7 +593,6 @@
           clips.push(clipUrl);
         }
 
-        // Disable button
         const generateBtn = document.getElementById('generateBtn');
         generateBtn.disabled = true;
         generateBtn.innerHTML = '<span class="spinner" style="width: 1.25rem; height: 1.25rem; border-width: 2px; margin: 0;"></span><span>Processing...</span>';
@@ -621,7 +640,6 @@
         checkRenderStatus(renderId);
       }, 3000);
       
-      // Initial check
       checkRenderStatus(renderId);
     }
 
@@ -647,16 +665,13 @@
       const progressFill = document.getElementById('progressFill');
       const duration = document.getElementById('duration');
 
-      // Update badge
       statusBadge.textContent = status.toUpperCase();
       statusBadge.className = 'badge';
 
-      // Update duration
       if(data.duration) {
         duration.textContent = data.duration + 's';
       }
 
-      // Update based on status
       if(status === 'queued') {
         statusBadge.classList.add('badge-warning');
         statusIcon.textContent = '⏳';
@@ -677,7 +692,6 @@
         statusMessage.textContent = 'Your video has been generated successfully!';
         progressFill.style.width = '100%';
         
-        // Show video preview
         if(data.url) {
           document.getElementById('progressSection').style.display = 'none';
           document.getElementById('videoPreviewSection').style.display = 'block';
@@ -712,14 +726,44 @@
       generateBtn.disabled = false;
       generateBtn.innerHTML = '<span>🎬</span><span>Generate Video</span>';
       
-      // Remove all selected classes
       for(let i = 1; i <= 12; i++) {
         const item = document.getElementById(`clip-item-${i}`);
         if (item) item.classList.remove('selected');
       }
       
-      // Reset preview
       hideVideoPreview();
+    }
+
+    function filterVideosByCategory() {
+      const selectedCategory = document.getElementById('categoryFilter').value;
+      
+      for(let i = 1; i <= 12; i++) {
+        const select = document.getElementById(`clip${i}`);
+        if (!select) continue;
+        
+        const options = select.querySelectorAll('option');
+        options.forEach(option => {
+          if (option.value === '') {
+            option.style.display = 'block';
+            return;
+          }
+          
+          const category = option.getAttribute('data-category');
+          if (!selectedCategory || category === selectedCategory) {
+            option.style.display = 'block';
+          } else {
+            option.style.display = 'none';
+          }
+        });
+        
+        if (select.value) {
+          const selectedOption = select.querySelector(`option[value="${select.value}"]`);
+          if (selectedOption && selectedOption.style.display === 'none') {
+            select.value = '';
+            document.getElementById(`clip-item-${i}`).classList.remove('selected');
+          }
+        }
+      }
     }
   </script>
 </body>

@@ -5,120 +5,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - SIJAGO+ AI</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <%- include('partials/navbar', { user: user, currentPage: 'dashboard' }) %>
+  <%- include('partials/sidebar', { user: user, currentPage: 'dashboard' }) %>
 
-  <div class="container">
-    <div class="page-header">
-      <h1 class="page-title">Welcome back, <%= user.username %>! 👋</h1>
-      <p class="page-subtitle">Here's what's happening with your SIJAGO+ AI today.</p>
-    </div>
+    <div class="content-wrapper">
+      <div class="page-header">
+        <h1 class="page-title">Welcome back, <%= user.username %>! 👋</h1>
+        <p class="page-subtitle">Here's what's happening with your SIJAGO+ AI today.</p>
+      </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Files</div>
-        <div class="stat-value"><%= stats.totalFiles %></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Total Storage</div>
-        <div class="stat-value"><%= (stats.totalSize / 1024 / 1024).toFixed(2) %> MB</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Account Type</div>
-        <div class="stat-value" style="font-size: 1.5rem; text-transform: uppercase;"><%= user.role %></div>
-      </div>
-    </div>
-
-    <div class="grid grid-3">
-      <a href="/media" class="card" style="text-decoration: none; color: inherit;">
-        <div style="text-align: center;">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
-          <h3 style="margin-bottom: 0.5rem; color: var(--gray-900);">Upload Files</h3>
-          <p style="color: var(--gray-500); font-size: 0.875rem;">Upload new media files to your storage</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Files</div>
+          <div class="stat-value"><%= stats.totalFiles %></div>
         </div>
-      </a>
-
-      <a href="/video" class="card" style="text-decoration: none; color: inherit;">
-        <div style="text-align: center;">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">🎬</div>
-          <h3 style="margin-bottom: 0.5rem; color: var(--gray-900);">Generate Video</h3>
-          <p style="color: var(--gray-500); font-size: 0.875rem;">Create videos from your uploaded clips</p>
+        <div class="stat-card">
+          <div class="stat-label">Total Storage</div>
+          <div class="stat-value"><%= (stats.totalSize / 1024 / 1024).toFixed(2) %> MB</div>
         </div>
-      </a>
+        <div class="stat-card">
+          <div class="stat-label">Account Type</div>
+          <div class="stat-value" style="font-size: 1.5rem; text-transform: uppercase;"><%= user.role %></div>
+        </div>
+      </div>
 
-      <% if (user.role === 'admin') { %>
-        <a href="/users" class="card" style="text-decoration: none; color: inherit;">
+      <div class="grid grid-3">
+        <a href="/media" class="card" style="text-decoration: none; color: inherit;">
           <div style="text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
-            <h3 style="margin-bottom: 0.5rem; color: var(--gray-900);">Manage Users</h3>
-            <p style="color: var(--gray-500); font-size: 0.875rem;">Add or edit user accounts</p>
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--gray-900);">Upload Files</h3>
+            <p style="color: var(--gray-500); font-size: 0.875rem;">Upload new media files to your storage</p>
           </div>
         </a>
-      <% } %>
-    </div>
 
-    <div class="card" style="margin-top: 2rem;">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span>📁</span>
-          Recent Uploads
-        </h2>
+        <a href="/video" class="card" style="text-decoration: none; color: inherit;">
+          <div style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🎬</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--gray-900);">Generate Video</h3>
+            <p style="color: var(--gray-500); font-size: 0.875rem;">Create videos from your uploaded clips</p>
+          </div>
+        </a>
+
+        <% if (user.role === 'admin') { %>
+          <a href="/users" class="card" style="text-decoration: none; color: inherit;">
+            <div style="text-align: center;">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+              <h3 style="margin-bottom: 0.5rem; color: var(--gray-900);">Manage Users</h3>
+              <p style="color: var(--gray-500); font-size: 0.875rem;">Add or edit user accounts</p>
+            </div>
+          </a>
+        <% } %>
       </div>
 
-      <% if (recentMedia.length > 0) { %>
-        <div class="table-container" style="box-shadow: none;">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>File Name</th>
-                <th>Size</th>
-                <th>Uploaded</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% recentMedia.forEach(item => { %>
+      <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span>📁</span>
+            Recent Uploads
+          </h2>
+        </div>
+
+        <% if (recentMedia.length > 0) { %>
+          <div class="table-container" style="box-shadow: none;">
+            <table class="table">
+              <thead>
                 <tr>
-                  <td>
-                    <span style="font-size: 1.5rem;">
-                      <% if (item.mime_type.startsWith('image/')) { %>
-                        🖼️
-                      <% } else if (item.mime_type.startsWith('video/')) { %>
-                        🎥
-                      <% } else if (item.mime_type.includes('pdf')) { %>
-                        📄
-                      <% } else { %>
-                        📎
-                      <% } %>
-                    </span>
-                  </td>
-                  <td>
-                    <div style="font-weight: 500; color: var(--gray-900);"><%= item.original_name %></div>
-                  </td>
-                  <td><%= (item.file_size / 1024).toFixed(2) %> KB</td>
-                  <td style="color: var(--gray-500); font-size: 0.875rem;">
-                    <%= new Date(item.created_at).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    }) %>
-                  </td>
+                  <th>Type</th>
+                  <th>File Name</th>
+                  <th>Size</th>
+                  <th>Uploaded</th>
                 </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        </div>
-      <% } else { %>
-        <div style="text-align: center; padding: 3rem; color: var(--gray-400);">
-          <div style="font-size: 4rem; margin-bottom: 1rem;">📁</div>
-          <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">No media files yet</p>
-          <p style="font-size: 0.875rem;">Start by uploading your first file!</p>
-        </div>
-      <% } %>
+              </thead>
+              <tbody>
+                <% recentMedia.forEach(item => { %>
+                  <tr>
+                    <td>
+                      <span style="font-size: 1.5rem;">
+                        <% if (item.mime_type.startsWith('image/')) { %>
+                          🖼️
+                        <% } else if (item.mime_type.startsWith('video/')) { %>
+                          🎥
+                        <% } else if (item.mime_type.includes('pdf')) { %>
+                          📄
+                        <% } else { %>
+                          📎
+                        <% } %>
+                      </span>
+                    </td>
+                    <td>
+                      <div style="font-weight: 500; color: var(--gray-900);"><%= item.original_name %></div>
+                    </td>
+                    <td><%= (item.file_size / 1024).toFixed(2) %> KB</td>
+                    <td style="color: var(--gray-500); font-size: 0.875rem;">
+                      <%= new Date(item.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div style="text-align: center; padding: 3rem; color: var(--gray-400);">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📁</div>
+            <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">No media files yet</p>
+            <p style="font-size: 0.875rem;">Start by uploading your first file!</p>
+          </div>
+        <% } %>
+      </div>
     </div>
-  </div>
+
+  <%- include('partials/footer') %>
 </body>
 </html>

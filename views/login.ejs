@@ -6,65 +6,261 @@
   <title>Login - SIJAGO+ AI</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      background: linear-gradient(135deg, #FFB6C1 0%, #E6E6FA 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      padding: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
 
-    .login-container {
-      background: var(--white);
-      padding: 3rem;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-xl);
+    .login-wrapper {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
       width: 100%;
-      max-width: 420px;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 45% 55%;
+      overflow: hidden;
+      min-height: 600px;
     }
 
-    .login-header {
-      text-align: center;
-      margin-bottom: 2rem;
+    .login-left {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
     }
 
-    .login-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
+    .login-illustration {
+      width: 100%;
+      max-width: 350px;
+      height: auto;
+      position: relative;
+      z-index: 2;
     }
 
-    .login-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--gray-900);
+    .login-left::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      top: -50%;
+      left: -50%;
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .login-right {
+      padding: 3rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .logo-section {
       margin-bottom: 0.5rem;
     }
 
-    .login-subtitle {
-      color: var(--gray-500);
-      font-size: 0.9375rem;
+    .logo-emoji {
+      font-size: 2rem;
+      display: inline-block;
+      margin-bottom: 0.5rem;
     }
 
-    .login-footer {
+    .login-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+      color: #6b7280;
+      font-size: 0.9375rem;
+      margin-bottom: 2rem;
+    }
+
+    .alert {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c33;
+      padding: 0.875rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-label span {
+      color: #ef4444;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      transition: all 0.2s;
+      background: #ffffff;
+      color: #1a1a1a;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      color: #374151;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+
+    .forgot-password {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .forgot-password:hover {
+      color: #764ba2;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.875rem;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #dc2626;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .register-link {
       text-align: center;
       margin-top: 1.5rem;
       padding-top: 1.5rem;
-      border-top: 1px solid var(--gray-200);
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .register-link a {
+      color: #ef4444;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .register-link a:hover {
+      color: #dc2626;
     }
 
     .login-info {
-      font-size: 0.875rem;
-      color: var(--gray-500);
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 0.875rem;
+      border-radius: 8px;
+      margin-top: 1.5rem;
+      font-size: 0.8125rem;
+      color: #6b7280;
+      text-align: center;
     }
 
     .login-info strong {
-      color: var(--gray-700);
-      font-weight: 600;
+      color: #374151;
+      display: block;
+      margin-bottom: 0.25rem;
     }
 
-    @media (max-width: 480px) {
-      .login-container {
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .login-wrapper {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+      }
+
+      .login-left {
+        display: none;
+      }
+
+      .login-right {
         padding: 2rem 1.5rem;
       }
 
@@ -72,43 +268,127 @@
         font-size: 1.5rem;
       }
     }
+
+    @media (max-width: 480px) {
+      .login-right {
+        padding: 1.5rem 1.25rem;
+      }
+
+      .form-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-header">
-      <div class="login-icon">🤖</div>
-      <h1 class="login-title">SIJAGO+ AI</h1>
-      <p class="login-subtitle">Sign in to your account</p>
+  <div class="login-wrapper">
+    <!-- Left Side - Illustration -->
+    <div class="login-left">
+      <div class="login-illustration">
+        <!-- Placeholder for illustration - replace with actual image -->
+        <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#C44569;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#A8E6CF;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#3D84A8;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Body -->
+          <ellipse cx="200" cy="320" rx="80" ry="100" fill="url(#grad1)"/>
+          
+          <!-- Head -->
+          <circle cx="200" cy="180" r="70" fill="url(#grad1)"/>
+          
+          <!-- Headphones -->
+          <path d="M130 160 Q120 140 120 120 Q120 80 160 70" stroke="#8B5CF6" stroke-width="12" fill="none" stroke-linecap="round"/>
+          <path d="M270 160 Q280 140 280 120 Q280 80 240 70" stroke="#8B5CF6" stroke-width="12" fill="none" stroke-linecap="round"/>
+          <circle cx="115" cy="170" r="25" fill="#8B5CF6"/>
+          <circle cx="285" cy="170" r="25" fill="#8B5CF6"/>
+          
+          <!-- VR Headset -->
+          <rect x="150" y="170" width="100" height="40" rx="8" fill="#6366F1"/>
+          <circle cx="175" cy="190" r="12" fill="#C7D2FE"/>
+          <circle cx="225" cy="190" r="12" fill="#C7D2FE"/>
+          
+          <!-- Arms -->
+          <ellipse cx="130" cy="280" rx="20" ry="60" fill="url(#grad1)" transform="rotate(-20 130 280)"/>
+          <ellipse cx="270" cy="280" rx="20" ry="60" fill="url(#grad1)" transform="rotate(20 270 280)"/>
+          
+          <!-- Decorative waves -->
+          <path d="M50 350 Q100 330 150 350 T250 350 T350 350" stroke="url(#grad2)" stroke-width="8" fill="none" opacity="0.6"/>
+          <path d="M30 370 Q80 350 130 370 T230 370 T330 370" stroke="url(#grad2)" stroke-width="8" fill="none" opacity="0.4"/>
+        </svg>
+      </div>
     </div>
-    
-    <% if (error) { %>
-      <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
-        <span class="alert-icon">❌</span>
-        <div class="alert-content"><%= error %></div>
-      </div>
-    <% } %>
-    
-    <form action="/auth/login" method="POST">
-      <div class="form-group">
-        <label class="form-label" for="username">Username</label>
-        <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required autofocus>
-      </div>
+
+    <!-- Right Side - Login Form -->
+    <div class="login-right">
+      <!-- <div class="logo-section">
+        <div class="logo-emoji">🤖</div>
+      </div> -->
       
-      <div class="form-group">
-        <label class="form-label" for="password">Password</label>
-        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
-      </div>
+      <h1 class="login-title">Log in</h1>
+      <p class="login-subtitle">Welcome to SIJAGO AI+. please enter your details</p>
       
-      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-        <span>🔐</span>
-        <span>Sign In</span>
-      </button>
-    </form>
-    
-    <div class="login-footer">
+      <% if (error) { %>
+        <div class="alert">
+          <span>❌</span>
+          <span><%= error %></span>
+        </div>
+      <% } %>
+      
+      <form action="/auth/login" method="POST">
+        <div class="form-group">
+          <label class="form-label" for="username">Username/Email<span>*</span></label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            class="form-control" 
+            placeholder="meta@email.com" 
+            required 
+            autofocus
+          >
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="password">Password <span>*</span></label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-control" 
+            placeholder="meta@email.com" 
+            required
+          >
+        </div>
+        
+        <div class="form-footer">
+          <label class="remember-me">
+            <input type="checkbox" name="remember">
+            <span>Remember</span>
+          </label>
+          <a href="#" class="forgot-password">Forgot password</a>
+        </div>
+        
+        <button type="submit" class="btn-primary">
+          Sign in
+        </button>
+        
+        <div class="register-link">
+          Don't have an account? <a href="#">Register Here</a>
+        </div>
+      </form>
+      
       <div class="login-info">
-        <strong>Default Admin Account:</strong><br>
+        <strong>Default Admin Account:</strong>
         Username: admin | Password: admin123
       </div>
     </div>

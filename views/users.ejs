@@ -5,62 +5,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Management - SIJAGO+ AI</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 <body>
-  <%- include('partials/navbar', { user: user, currentPage: 'users' }) %>
+  <%- include('partials/sidebar', { user: user, currentPage: 'users' }) %>
 
-  <div class="container">
-    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <h1 class="page-title">User Management</h1>
-        <p class="page-subtitle">Manage user accounts and permissions</p>
+    <div class="content-wrapper">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">User Management</h1>
+          <p class="page-subtitle">Manage user accounts and permissions</p>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="openCreateModal()">
+          <span>➕</span>
+          <span>Add New User</span>
+        </button>
       </div>
-      <button class="btn btn-primary btn-lg" onclick="openCreateModal()">
-        <span>➕</span>
-        <span>Add New User</span>
-      </button>
-    </div>
 
-    <div id="message"></div>
+      <div id="message"></div>
 
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Created At</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% users.forEach(u => { %>
+      <div class="table-container">
+        <table class="table">
+          <thead>
             <tr>
-              <td><%= u.id %></td>
-              <td style="font-weight: 600;"><%= u.username %></td>
-              <td><%= u.email %></td>
-              <td>
-                <span class="badge badge-<%= u.role %>"><%= u.role %></span>
-              </td>
-              <td><%= new Date(u.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
-              <td>
-                <div style="display: flex; gap: 0.5rem;">
-                  <button class="btn btn-success btn-sm" onclick='openEditModal(<%= JSON.stringify(u) %>)'>
-                    ✏️ Edit
-                  </button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteUser(<%= u.id %>)">
-                    🗑️ Delete
-                  </button>
-                </div>
-              </td>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Created At</th>
+              <th>Actions</th>
             </tr>
-          <% }); %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% users.forEach(u => { %>
+              <tr>
+                <td><%= u.id %></td>
+                <td style="font-weight: 600;"><%= u.username %></td>
+                <td><%= u.email %></td>
+                <td>
+                  <span class="badge badge-<%= u.role %>"><%= u.role %></span>
+                </td>
+                <td><%= new Date(u.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                <td>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-success btn-sm" onclick='openEditModal(<%= JSON.stringify(u) %>)'>
+                      ✏️ Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteUser(<%= u.id %>)">
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
   <!-- Modal Create User -->
   <div id="createModal" class="modal">
@@ -130,6 +169,8 @@
       </form>
     </div>
   </div>
+
+  <%- include('partials/footer') %>
 
   <script>
     function showMessage(message, type) {
@@ -239,7 +280,6 @@
       }
     }
 
-    // Close modal when clicking outside
     window.onclick = function(event) {
       const createModal = document.getElementById('createModal');
       const editModal = document.getElementById('editModal');

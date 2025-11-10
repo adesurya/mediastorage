@@ -1,0 +1,78 @@
+  </main>
+</div>
+
+<script>
+  // Mobile menu toggle with improved functionality
+  const mobileToggle = document.getElementById('mobileToggle');
+  const sidebar = document.getElementById('sidebar');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  const body = document.body;
+
+  if (mobileToggle && sidebar && mobileOverlay) {
+    // Toggle sidebar
+    mobileToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleSidebar();
+    });
+
+    // Close sidebar when clicking overlay
+    mobileOverlay.addEventListener('click', function() {
+      closeSidebar();
+    });
+
+    // Close sidebar when clicking nav link (mobile only)
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          setTimeout(() => closeSidebar(), 200);
+        }
+      });
+    });
+
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        if (window.innerWidth > 768) {
+          closeSidebar();
+        }
+      }, 250);
+    });
+
+    // Prevent scroll on body when sidebar is open
+    function toggleSidebar() {
+      const isOpen = sidebar.classList.contains('mobile-open');
+      
+      if (isOpen) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    function openSidebar() {
+      mobileToggle.classList.add('active');
+      sidebar.classList.add('mobile-open');
+      mobileOverlay.classList.add('active');
+      body.classList.add('sidebar-open');
+      body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      mobileToggle.classList.remove('active');
+      sidebar.classList.remove('mobile-open');
+      mobileOverlay.classList.remove('active');
+      body.classList.remove('sidebar-open');
+      body.style.overflow = '';
+    }
+
+    // Close sidebar on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+        closeSidebar();
+      }
+    });
+  }
+</script>
