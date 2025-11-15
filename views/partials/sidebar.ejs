@@ -368,9 +368,8 @@
         </a>
       </div>
 
-      <!-- Stitch Section -->
       <div class="nav-section">
-        <div class="nav-section-title">Stitch Mix</div>
+        <div class="nav-section-title">File Management</div>
         <a href="/media" class="nav-link <%= currentPage === 'media' ? 'active' : '' %>">
           <span class="nav-icon">📁</span>
           <span class="nav-text">Upload Media</span>
@@ -379,10 +378,19 @@
           <span class="nav-icon">📂</span>
           <span class="nav-text">Categories</span>
         </a>
+      </div>
+
+      <!-- Stitch Section -->
+      <div class="nav-section">
+        <div class="nav-section-title">Video Generator</div>
         <a href="/video" class="nav-link <%= currentPage === 'video' ? 'active' : '' %>">
           <span class="nav-icon">🎬</span>
-          <span class="nav-text">Stitch Mix</span>
+          <span class="nav-text">Stitch Video</span>
         </a>
+        <a href="/video-ai" class="nav-link <%= currentPage === 'video-ai' ? 'active' : '' %>">
+        <span class="nav-icon">🎬</span>
+        <span class="nav-text">Video Generator (Ultra)</span>
+      </a>
       </div>
 
       <div class="nav-section">
@@ -392,6 +400,27 @@
           <span class="nav-text">Generate</span>
         </a>
       </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Virtual Influencer</div>
+        <a href="/persona" class="nav-link <%= currentPage === 'persona' ? 'active' : '' %>">
+          <span class="nav-icon">🎨</span>
+          <span class="nav-text">Persona Generator</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Product Shoot</div>
+        <a href="/product-shot" class="nav-link <%= currentPage === 'product-shot' ? 'active' : '' %>">
+          <span class="nav-icon">📸</span>
+          <span class="nav-text">Singe Image</span>
+        </a>
+        <a href="/promotion" class="nav-link <%= currentPage === 'promotion' ? 'active' : '' %>">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-text">Multiple Image</span>
+        </a>
+      </div>
+
 
       <!-- Admin Section -->
       <% if (user.role === 'admin') { %>

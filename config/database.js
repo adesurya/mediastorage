@@ -91,6 +91,78 @@ const initDatabase = async () => {
       )
     `);
 
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS personas (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        prompt TEXT NOT NULL,
+        optimized_prompt TEXT,
+        request_id VARCHAR(255) NOT NULL,
+        status ENUM('processing', 'completed', 'failed') DEFAULT 'processing',
+        image_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_created (user_id, created_at DESC),
+        INDEX idx_request_id (request_id)
+      )
+    `);
+
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS product_promotions (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        prompt TEXT NOT NULL,
+        optimized_prompt TEXT,
+        image_urls TEXT NOT NULL,
+        request_id VARCHAR(255) NOT NULL,
+        status ENUM('processing', 'completed', 'failed') DEFAULT 'processing',
+        result_image_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_created (user_id, created_at DESC),
+        INDEX idx_request_id (request_id)
+      )
+    `);
+
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS video_ai (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        prompt TEXT NOT NULL,
+        optimized_prompt TEXT,
+        image_url VARCHAR(500) NOT NULL,
+        request_id VARCHAR(255) NOT NULL,
+        status ENUM('processing', 'completed', 'failed') DEFAULT 'processing',
+        video_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_created (user_id, created_at DESC),
+        INDEX idx_request_id (request_id)
+      )
+    `);
+
+    await promisePool.query(`
+      CREATE TABLE IF NOT EXISTS product_shots (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        scene_description TEXT NOT NULL,
+        optimized_description TEXT,
+        product_image_url VARCHAR(500) NOT NULL,
+        ref_image_url VARCHAR(500),
+        request_id VARCHAR(255) NOT NULL,
+        status ENUM('processing', 'completed', 'failed') DEFAULT 'processing',
+        result_image_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_created (user_id, created_at DESC),
+        INDEX idx_request_id (request_id)
+      )
+    `);
+
     console.log('✅ Database tables initialized');
 
     const bcrypt = require('bcryptjs');

@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Promotion - SIJAGO+ AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 450px;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .generator-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-zone {
+      border: 3px dashed var(--gray-300);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      background: var(--gray-50);
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+      transform: scale(1.02);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.1);
+      border-width: 4px;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .upload-text {
+      font-size: 1rem;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .upload-hint {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+
+    #imageInput {
+      display: none;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .preview-item {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      aspect-ratio: 1;
+      background: var(--gray-100);
+      box-shadow: var(--shadow);
+    }
+
+    .preview-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-preview {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: var(--transition);
+    }
+
+    .remove-preview:hover {
+      background: rgb(220, 38, 38);
+      transform: scale(1.1);
+    }
+
+    .prompt-input-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .prompt-textarea {
+      flex: 1;
+      padding: 0.875rem;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius-lg);
+      font-size: 0.9375rem;
+      resize: vertical;
+      min-height: 120px;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .prompt-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .optimize-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 0.875rem 1.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      height: fit-content;
+      white-space: nowrap;
+      box-shadow: var(--shadow);
+    }
+
+    .optimize-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .optimize-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .generate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .result-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      color: var(--gray-400);
+      text-align: center;
+      border: 2px dashed var(--gray-300);
+      border-radius: var(--radius-lg);
+      background: var(--gray-50);
+    }
+
+    .result-placeholder-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+      animation: pulse 2s infinite;
+    }
+
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--gray-200);
+      border-top-color: #f59e0b;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: var(--gray-600);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .result-image-wrapper {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--gray-100);
+      box-shadow: var(--shadow);
+    }
+
+    .result-image {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .download-btn {
+      margin-top: 1rem;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .download-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .history-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .history-item {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--gray-100);
+      box-shadow: var(--shadow);
+    }
+
+    .history-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .history-image {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .history-item:hover .history-image {
+      transform: scale(1.1);
+    }
+
+    .history-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      padding: 1rem 0.75rem 0.75rem;
+      color: white;
+    }
+
+    .history-prompt {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .history-sources {
+      display: flex;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .history-source-thumb {
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .history-date {
+      font-size: 0.6875rem;
+      opacity: 0.8;
+      margin-top: 0.25rem;
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--gray-400);
+    }
+
+    .empty-history-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+      animation: pulse 2s infinite;
+    }
+
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-lg);
+      margin-bottom: 1rem;
+      font-size: 0.9375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .alert-info {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
+    }
+
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-card {
+        position: static;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .generator-card,
+      .result-card,
+      .history-section {
+        padding: 1.5rem;
+      }
+
+      .prompt-input-wrapper {
+        flex-direction: column;
+      }
+
+      .optimize-btn {
+        width: 100%;
+      }
+
+      .history-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar', { user: user, currentPage: 'promotion' }) %>
+
+  <div class="content-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">
+        <span>🛍️</span>
+        <span>Product Promotion</span>
+      </h1>
+      <p class="page-subtitle">Transform your product images with AI-powered creative editing</p>
+    </div>
+
+    <div class="content-grid">
+      <div class="generator-card">
+        <h2 class="card-title">
+          <span>✨</span>
+          <span>Create Product Promotion</span>
+        </h2>
+
+        <div id="alertContainer"></div>
+
+        <form id="promotionForm">
+          <div class="form-group">
+            <label class="form-label">Upload Product Images (1-4 images)</label>
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-icon">📸</div>
+              <div class="upload-text">Click to upload or drag and drop</div>
+              <div class="upload-hint">PNG, JPG, WEBP up to 10MB • Maximum 4 images</div>
+              <div id="imageCounter" style="font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-top: 0.5rem;"></div>
+              <input type="file" id="imageInput" accept="image/jpeg,image/jpg,image/png,image/webp" multiple>
+            </div>
+            <div id="previewGrid" class="preview-grid"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Describe Your Creative Vision</label>
+            <div class="prompt-input-wrapper">
+              <textarea 
+                id="promptInput" 
+                class="prompt-textarea" 
+                placeholder="Contoh: Tambahkan background toko modern dengan pencahayaan hangat, letakkan produk di meja kayu dengan dekorasi minimalis..."
+                required
+              ></textarea>
+              <button type="button" id="optimizeBtn" class="optimize-btn">
+                🚀 Optimize
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="generateBtn" class="generate-btn">
+            <span>🎨</span>
+            <span>Generate Promotion</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="result-card">
+        <h2 class="card-title">
+          <span>🖼️</span>
+          <span>Result</span>
+        </h2>
+        
+        <div id="resultContainer">
+          <div class="result-placeholder">
+            <div class="result-placeholder-icon">🎁</div>
+            <p>Your promotional image will appear here</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <h2 class="card-title">
+        <span>📜</span>
+        <span>Generation History</span>
+      </h2>
+      <div id="historyGrid" class="history-grid">
+        <% if (history && history.length > 0) { %>
+          <% history.forEach((item, index) => { %>
+            <% if (item.status === 'completed' && item.result_image_url) { %>
+              <div class="history-item" onclick="showHistoryImage('<%= item.result_image_url %>', '<%= (item.optimized_prompt || item.prompt).replace(/'/g, "\\'") %>')" style="animation-delay: <%= index * 0.05 %>s">
+                <img src="<%= item.result_image_url %>" alt="Promotion" class="history-image" loading="lazy">
+                <div class="history-overlay">
+                  <div class="history-prompt"><%= item.prompt.substring(0, 60) %>...</div>
+                  <div class="history-sources">
+                    <% item.image_urls.slice(0, 4).forEach(url => { %>
+                      <img src="<%= url %>" alt="Source" class="history-source-thumb">
+                    <% }); %>
+                  </div>
+                  <div class="history-date"><%= new Date(item.created_at).toLocaleDateString('id-ID') %></div>
+                </div>
+              </div>
+            <% } %>
+          <% }); %>
+        <% } else { %>
+          <div class="empty-history" style="grid-column: 1 / -1;">
+            <div class="empty-history-icon">📭</div>
+            <p style="font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--gray-600);">No generation history yet</p>
+            <p style="font-size: 0.875rem;">Start creating promotions to see them here</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    let currentRequestId = null;
+    let checkStatusRetries = 0;
+    const MAX_RETRIES = 60; // Max 60 retries (2 minutes with 2s interval)
+    let uploadedImageUrls = [];
+
+    const uploadZone = document.getElementById('uploadZone');
+    const imageInput = document.getElementById('imageInput');
+    const previewGrid = document.getElementById('previewGrid');
+    const optimizeBtn = document.getElementById('optimizeBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    const promptInput = document.getElementById('promptInput');
+    const promotionForm = document.getElementById('promotionForm');
+    const resultContainer = document.getElementById('resultContainer');
+    const alertContainer = document.getElementById('alertContainer');
+
+    function showAlert(message, type = 'info') {
+      alertContainer.innerHTML = `<div class="alert alert-${type}"><span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>${message}</div>`;
+      setTimeout(() => {
+        alertContainer.innerHTML = '';
+      }, 5000);
+    }
+
+    uploadZone.addEventListener('click', () => {
+      imageInput.click();
+    });
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      
+      if (e.dataTransfer.files.length) {
+        imageInput.files = e.dataTransfer.files;
+        handleImageUpload();
+      }
+    });
+
+    imageInput.addEventListener('change', () => {
+      if (imageInput.files.length) {
+        handleImageUpload();
+      }
+    });
+
+    async function handleImageUpload() {
+      const files = imageInput.files;
+      
+      if (files.length === 0) {
+        showAlert('Please select at least one image', 'error');
+        return;
+      }
+
+      // Check total count including already uploaded
+      if (uploadedImageUrls.length + files.length > 4) {
+        showAlert(`Maximum 4 images allowed. You already have ${uploadedImageUrls.length} image(s)`, 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('images', files[i]);
+      }
+
+      try {
+        const response = await fetch('/promotion/upload-images', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Append new URLs to existing ones
+          uploadedImageUrls = [...uploadedImageUrls, ...data.imageUrls];
+          displayAllPreviews();
+          showAlert(`${files.length} image(s) uploaded successfully! Total: ${uploadedImageUrls.length}`, 'success');
+          
+          // Clear input
+          imageInput.value = '';
+        } else {
+          showAlert(data.message || 'Failed to upload images', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert('An error occurred while uploading', 'error');
+      }
+    }
+
+    function displayAllPreviews() {
+      previewGrid.innerHTML = '';
+      
+      uploadedImageUrls.forEach((url, index) => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.innerHTML = `
+          <img src="${url}" alt="Preview" class="preview-image">
+          <button type="button" class="remove-preview" onclick="removePreview(${index})">×</button>
+        `;
+        previewGrid.appendChild(div);
+      });
+
+      // Update counter
+      const counter = document.getElementById('imageCounter');
+      if (uploadedImageUrls.length > 0) {
+        counter.textContent = `${uploadedImageUrls.length} / 4 images uploaded`;
+      } else {
+        counter.textContent = '';
+      }
+    }
+
+    function removePreview(index) {
+      uploadedImageUrls.splice(index, 1);
+      displayAllPreviews();
+      
+      if (uploadedImageUrls.length === 0) {
+        previewGrid.innerHTML = '';
+      }
+    }
+
+    optimizeBtn.addEventListener('click', async () => {
+      const prompt = promptInput.value.trim();
+      
+      if (!prompt) {
+        showAlert('Please enter a prompt first', 'error');
+        return;
+      }
+
+      optimizeBtn.disabled = true;
+      optimizeBtn.textContent = '⏳ Optimizing...';
+
+      try {
+        const response = await fetch('/promotion/optimize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          promptInput.value = data.optimizedPrompt;
+          showAlert('Prompt optimized successfully!', 'success');
+        } else {
+          showAlert(data.message || 'Failed to optimize prompt', 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert('An error occurred while optimizing', 'error');
+      } finally {
+        optimizeBtn.disabled = false;
+        optimizeBtn.textContent = '🚀 Optimize';
+      }
+    });
+
+    promotionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const prompt = promptInput.value.trim();
+      
+      if (!prompt) {
+        showAlert('Please enter a prompt', 'error');
+        return;
+      }
+
+      if (uploadedImageUrls.length === 0) {
+        showAlert('Please upload at least one image', 'error');
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span>⏳</span><span>Generating...</span>';
+
+      resultContainer.innerHTML = `
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text">Creating your promotion...</div>
+        </div>
+      `;
+
+      try {
+        const response = await fetch('/promotion/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            prompt,
+            optimizedPrompt: promptInput.value,
+            imageUrls: uploadedImageUrls
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          currentRequestId = data.requestId;
+          checkStatus();
+        } else {
+          showAlert(data.message || 'Failed to generate promotion', 'error');
+          resetForm();
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert('An error occurred while generating', 'error');
+        resetForm();
+      }
+    });
+
+    async function checkStatus() {
+      if (!currentRequestId) return;
+
+      // Check retry limit
+      if (checkStatusRetries >= MAX_RETRIES) {
+        showAlert('Gagal memproses permintaan Anda. Waktu tunggu terlalu lama. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+        resetForm();
+        return;
+      }
+
+      checkStatusRetries++;
+
+      try {
+        const response = await fetch(`/promotion/status/${currentRequestId}`);
+        const data = await response.json();
+
+        if (data.success && data.status === 'COMPLETED') {
+          displayResult(data.imageUrl);
+          refreshHistory();
+          showAlert('Promotion generated successfully!', 'success');
+          resetForm();
+          checkStatusRetries = 0;
+        } else if (data.success === false || data.status === 'FAILED') {
+          showAlert(data.message || 'Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+          resetForm();
+          checkStatusRetries = 0;
+        } else if (data.status === 'TIMEOUT' || data.status === 'ERROR' || data.status === 'NOT_FOUND') {
+          showAlert(data.message || 'Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+          resetForm();
+          checkStatusRetries = 0;
+        } else {
+          // Still processing (IN_QUEUE or IN_PROGRESS)
+          setTimeout(checkStatus, 2000);
+        }
+      } catch (error) {
+        console.error('Error checking status:', error);
+        
+        // Retry on network errors
+        if (checkStatusRetries < MAX_RETRIES) {
+          setTimeout(checkStatus, 3000); // Wait 3s on error
+        } else {
+          showAlert('Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+          resetForm();
+          checkStatusRetries = 0;
+        }
+      }
+    }
+
+    function displayResult(imageUrl) {
+      resultContainer.innerHTML = `
+        <div class="result-image-wrapper">
+          <img src="${imageUrl}" alt="Generated Promotion" class="result-image">
+        </div>
+        <button onclick="downloadImage('${imageUrl}')" class="download-btn">
+          ⬇️ Download Image
+        </button>
+      `;
+    }
+
+    function downloadImage(imageUrl) {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = `promotion_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function resetForm() {
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<span>🎨</span><span>Generate Promotion</span>';
+      currentRequestId = null;
+      checkStatusRetries = 0;
+      uploadedImageUrls = [];
+      previewGrid.innerHTML = '';
+      imageInput.value = '';
+    }
+
+    async function refreshHistory() {
+      try {
+        const response = await fetch('/promotion/history');
+        const data = await response.json();
+
+        if (data.success && data.history.length > 0) {
+          const historyHTML = data.history
+            .filter(item => item.status === 'completed' && item.result_image_url)
+            .map((item, index) => {
+              const sourceThumbs = item.image_urls.slice(0, 4).map(url => 
+                `<img src="${url}" alt="Source" class="history-source-thumb">`
+              ).join('');
+              
+              return `
+                <div class="history-item" onclick="showHistoryImage('${item.result_image_url}', '${(item.optimized_prompt || item.prompt).replace(/'/g, "\\'")}')">
+                  <img src="${item.result_image_url}" alt="Promotion" class="history-image" loading="lazy">
+                  <div class="history-overlay">
+                    <div class="history-prompt">${item.prompt.substring(0, 60)}...</div>
+                    <div class="history-sources">${sourceThumbs}</div>
+                    <div class="history-date">${new Date(item.created_at).toLocaleDateString('id-ID')}</div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+          document.getElementById('historyGrid').innerHTML = historyHTML;
+        }
+      } catch (error) {
+        console.error('Error refreshing history:', error);
+      }
+    }
+
+    function showHistoryImage(imageUrl, prompt) {
+      displayResult(imageUrl);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const historyItems = document.querySelectorAll('.history-item');
+      historyItems.forEach((item, index) => {
+        item.style.animationDelay = `${index * 0.05}s`;
+      });
+    });
+  </script>
+</body>
+</html>
