@@ -9,5 +9,5 @@ router.post('/optimize', authMiddleware, ProductShotController.optimizePrompt);
 router.post('/generate', authMiddleware, ProductShotController.generateProductShot);
 router.get('/status/:requestId', authMiddleware, ProductShotController.checkStatus);
 router.get('/history', authMiddleware, ProductShotController.getHistory);
-
+router.get('/processing-status', authMiddleware, ProductShotController.getProcessingStatus);
 module.exports = router;

@@ -9,5 +9,5 @@ router.post('/optimize', authMiddleware, PersonaController.optimizePrompt);
 router.post('/generate', authMiddleware, PersonaController.generatePersona);
 router.get('/status/:requestId', authMiddleware, PersonaController.checkStatus);
 router.get('/history', authMiddleware, PersonaController.getHistory);
-
+router.get('/processing-status', authMiddleware, PersonaController.getProcessingStatus);
 module.exports = router;

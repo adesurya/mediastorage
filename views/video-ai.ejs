@@ -489,6 +489,181 @@
       }
     }
   </style>
+  <style>
+  /* Modal Preview */
+  .preview-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .preview-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .preview-modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    animation: zoomIn 0.3s ease;
+  }
+
+  @keyframes zoomIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .preview-modal-image,
+  .preview-modal-video {
+    max-width: 100%;
+    max-height: 90vh;
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  .preview-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.5);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+  }
+
+  .preview-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+  }
+
+  .preview-modal-actions {
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .preview-modal-btn {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2937;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .preview-modal-btn:hover {
+    background: white;
+    transform: translateY(-2px);
+  }
+
+  /* Processing Item Styles */
+  .processing-item {
+    border: 2px dashed var(--primary);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.1));
+  }
+
+  .processing-spinner-container {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-50);
+    gap: 1rem;
+  }
+
+  .processing-status-text {
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-align: center;
+    padding: 0 0.5rem;
+  }
+
+  .processing-time {
+    font-size: 0.625rem;
+    color: var(--gray-500);
+  }
+
+  .failed-item {
+    border: 2px solid #fecaca;
+    background: #fee2e2;
+  }
+
+  .failed-icon-container {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fee2e2;
+    gap: 0.5rem;
+  }
+
+  .failed-icon {
+    font-size: 3rem;
+  }
+
+  .failed-text {
+    font-size: 0.75rem;
+    color: #991b1b;
+    font-weight: 600;
+  }
+
+  /* Status Badge */
+  .status-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 10;
+  }
+
+  .status-badge.processing {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    animation: pulse 2s infinite;
+  }
+
+  .status-badge.completed {
+    background: #10b981;
+    color: white;
+  }
+
+  .status-badge.failed {
+    background: #ef4444;
+    color: white;
+  }
+</style>
 </head>
 <body>
   <%- include('partials/sidebar', { user: user, currentPage: 'video-ai' }) %>
@@ -595,6 +770,17 @@
       </div>
     </div>
   </div>
+<div id="previewModal" class="preview-modal" onclick="closePreviewModal(event)">
+  <div class="preview-modal-content">
+    <span class="preview-modal-close" onclick="closePreviewModal()">&times;</span>
+    <div id="previewModalBody"></div>
+    <div class="preview-modal-actions">
+      <button class="preview-modal-btn" onclick="downloadFromModal()">
+        ⬇️ Download
+      </button>
+    </div>
+  </div>
+</div>
 
   <%- include('partials/footer') %>
 
@@ -786,50 +972,202 @@
       }
     });
 
-    async function checkStatus() {
-      if (!currentRequestId) return;
+    let autoRefreshInterval = null;
 
-      if (checkStatusRetries >= MAX_RETRIES) {
-        showAlert('Gagal memproses permintaan Anda. Waktu tunggu terlalu lama. Silahkan ulangi atau tunggu beberapa saat.', 'error');
-        resetForm();
+    // Function to check if there are processing items
+    async function checkProcessingStatus() {
+      try {
+        const response = await fetch('/video-ai/processing-status');
+        const data = await response.json();
+        
+        if (data.success && data.hasProcessing) {
+          // If there are processing items, refresh history periodically
+          if (!autoRefreshInterval) {
+            startAutoRefresh();
+          }
+        } else {
+          // No processing items, stop auto-refresh
+          if (autoRefreshInterval) {
+            stopAutoRefresh();
+          }
+        }
+      } catch (error) {
+        console.error('Error checking processing status:', error);
+      }
+    }
+
+    function startAutoRefresh() {
+      console.log('🔄 Auto-refresh started');
+      autoRefreshInterval = setInterval(async () => {
+        await refreshHistory();
+        await checkProcessingStatus();
+      }, 15000); // Refresh every 15 seconds
+    }
+
+    function stopAutoRefresh() {
+      if (autoRefreshInterval) {
+        console.log('🛑 Auto-refresh stopped');
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+      }
+    }
+
+    // Check on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      checkProcessingStatus();
+      
+      const historyItems = document.querySelectorAll('.history-item');
+      historyItems.forEach((item, index) => {
+        item.style.animationDelay = `${index * 0.05}s`;
+      });
+    });
+
+    // Update refreshHistory function to show processing items
+    async function refreshHistory() {
+      try {
+        const response = await fetch('/video-ai/history');
+        const data = await response.json();
+
+        if (data.success && data.history.length > 0) {
+          const historyHTML = data.history
+            .map((item, index) => {
+              if (item.status === 'completed' && item.image_url) {
+                return `
+                  <div class="history-item" onclick="showHistoryImage('${item.image_url}', '${(item.optimized_prompt || item.prompt).replace(/'/g, "\\'")}')">
+                    <img src="${item.image_url}" alt="Persona" class="history-image" loading="lazy">
+                    <div class="history-overlay">
+                      <div class="history-prompt">${item.prompt.substring(0, 50)}...</div>
+                      <div class="history-date">${new Date(item.created_at).toLocaleDateString('id-ID')}</div>
+                    </div>
+                  </div>
+                `;
+              } else if (item.status === 'processing') {
+                return `
+                  <div class="history-item processing-item">
+                    <div style="width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--gray-100);">
+                      <div class="spinner" style="width: 40px; height: 40px; border-width: 3px;"></div>
+                    </div>
+                    <div class="history-overlay">
+                      <div class="history-prompt">⏳ Processing...</div>
+                      <div class="history-date">${new Date(item.created_at).toLocaleDateString('id-ID')}</div>
+                    </div>
+                  </div>
+                `;
+              } else if (item.status === 'failed') {
+                return `
+                  <div class="history-item failed-item">
+                    <div style="width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #fee2e2; color: #991b1b; font-size: 2rem;">
+                      ❌
+                    </div>
+                    <div class="history-overlay" style="background: linear-gradient(to top, rgba(153,27,27,0.8), transparent);">
+                      <div class="history-prompt">Failed</div>
+                      <div class="history-date">${new Date(item.created_at).toLocaleDateString('id-ID')}</div>
+                    </div>
+                  </div>
+                `;
+              }
+              return '';
+            }).filter(html => html).join('');
+
+          document.getElementById('historyGrid').innerHTML = historyHTML;
+        }
+      } catch (error) {
+        console.error('Error refreshing history:', error);
+      }
+    }
+
+    // Modified generateBtn submit handler - remove currentRequestId checking
+    // Since backend worker handles it, just show success message
+    personaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const prompt = promptInput.value.trim();
+      
+      if (!prompt) {
+        showAlert('Please enter a prompt', 'error');
         return;
       }
 
-      checkStatusRetries++;
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<span>⏳</span><span>Generating...</span>';
 
       try {
-        const response = await fetch(`/video-ai/status/${currentRequestId}`);
+        const response = await fetch('/persona/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            prompt,
+            optimizedPrompt: promptInput.value 
+          })
+        });
+
         const data = await response.json();
 
-        if (data.success && data.status === 'COMPLETED') {
-          displayResult(data.videoUrl);
-          refreshHistory();
-          showAlert('Video generated successfully!', 'success');
-          resetForm();
-          checkStatusRetries = 0;
-        } else if (data.success === false || data.status === 'FAILED') {
-          showAlert(data.message || 'Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
-          resetForm();
-          checkStatusRetries = 0;
-        } else if (data.status === 'TIMEOUT' || data.status === 'ERROR' || data.status === 'NOT_FOUND') {
-          showAlert(data.message || 'Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
-          resetForm();
-          checkStatusRetries = 0;
+        if (data.success) {
+          showAlert('Generation started! Your persona will appear in history when ready.', 'success');
+          generateBtn.disabled = false;
+          generateBtn.innerHTML = '<span>🎨</span><span>Generate Persona</span>';
+          
+          // Start auto-refresh to check for updates
+          startAutoRefresh();
+          await refreshHistory();
         } else {
-          setTimeout(checkStatus, 2000);
+          showAlert(data.message || 'Failed to generate persona', 'error');
+          generateBtn.disabled = false;
+          generateBtn.innerHTML = '<span>🎨</span><span>Generate Persona</span>';
         }
       } catch (error) {
-        console.error('Error checking status:', error);
-        
-        if (checkStatusRetries < MAX_RETRIES) {
-          setTimeout(checkStatus, 3000);
-        } else {
-          showAlert('Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
-          resetForm();
-          checkStatusRetries = 0;
-        }
+        console.error('Error:', error);
+        showAlert('An error occurred while generating', 'error');
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>🎨</span><span>Generate Persona</span>';
       }
-    }
+    });
+
+    // async function checkStatus() {
+    //   if (!currentRequestId) return;
+
+    //   if (checkStatusRetries >= MAX_RETRIES) {
+    //     showAlert('Gagal memproses permintaan Anda. Waktu tunggu terlalu lama. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+    //     resetForm();
+    //     return;
+    //   }
+
+    //   checkStatusRetries++;
+
+    //   try {
+    //     const response = await fetch(`/video-ai/status/${currentRequestId}`);
+    //     const data = await response.json();
+
+    //     if (data.success && data.status === 'COMPLETED') {
+    //       displayResult(data.videoUrl);
+    //       refreshHistory();
+    //       showAlert('Video generated successfully!', 'success');
+    //       resetForm();
+    //       checkStatusRetries = 0;
+    //     } else if (data.success === false || data.status === 'FAILED') {
+    //       showAlert(data.message || 'Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+    //       resetForm();
+    //       checkStatusRetries = 0;
+    //     } else if (data.status === 'TIMEOUT' || data.status === 'ERROR' || data.status === 'NOT_FOUND') {
+    //       showAlert(data.message || 'Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+    //       resetForm();
+    //       checkStatusRetries = 0;
+    //     } else {
+    //       setTimeout(checkStatus, 2000);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error checking status:', error);
+        
+    //     if (checkStatusRetries < MAX_RETRIES) {
+    //       setTimeout(checkStatus, 3000);
+    //     } else {
+    //       showAlert('Gagal memproses permintaan Anda. Silahkan ulangi atau tunggu beberapa saat.', 'error');
+    //       resetForm();
+    //       checkStatusRetries = 0;
+    //     }
+    //   }
+    // }
 
     function displayResult(videoUrl) {
       resultContainer.innerHTML = `
@@ -900,5 +1238,72 @@
       });
     });
   </script>
+  <script>
+let currentPreviewUrl = '';
+
+function openPreviewModal(url, type = 'image') {
+  currentPreviewUrl = url;
+  const modal = document.getElementById('previewModal');
+  const modalBody = document.getElementById('previewModalBody');
+  
+  if (type === 'video') {
+    modalBody.innerHTML = `
+      <video class="preview-modal-video" controls autoplay>
+        <source src="${url}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    `;
+  } else {
+    modalBody.innerHTML = `<img src="${url}" class="preview-modal-image" alt="Preview">`;
+  }
+  
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePreviewModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  
+  const modal = document.getElementById('previewModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = 'auto';
+  
+  // Stop video if playing
+  const video = modal.querySelector('video');
+  if (video) {
+    video.pause();
+    video.currentTime = 0;
+  }
+}
+
+function downloadFromModal() {
+  const link = document.createElement('a');
+  link.href = currentPreviewUrl;
+  const filename = currentPreviewUrl.split('/').pop();
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ESC key to close
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closePreviewModal();
+  }
+});
+
+// Calculate time ago
+function getTimeAgo(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  
+  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return date.toLocaleDateString('id-ID');
+}
+</script>
 </body>
 </html>

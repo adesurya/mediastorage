@@ -10,6 +10,7 @@ const VideoAI = require('./models/VideoAI');
 const ProductShot = require('./models/ProductShot');
 
 require('dotenv').config();
+const backgroundWorker = require('./backgroundWorker');
 
 const { initDatabase } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
@@ -105,7 +106,18 @@ app.use('/previews', (req, res, next) => {
   next();
 }, express.static(path.join(__dirname, 'public/previews')));
 
+backgroundWorker.start();
+process.on('SIGINT', () => {
+  console.log('\n🛑 Shutting down server...');
+  backgroundWorker.stop();
+  process.exit(0);
+});
 
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Shutting down server...');
+  backgroundWorker.stop();
+  process.exit(0);
+});
 app.listen(PORT, () => {
   console.log(`Server: http://localhost:${PORT}`);
 });

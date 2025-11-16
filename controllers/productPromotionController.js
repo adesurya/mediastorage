@@ -207,6 +207,21 @@ class ProductPromotionController {
     }
   }
 
+  static async getProcessingStatus(req, res) {
+  try {
+    const userId = req.session.userId;
+    const { promisePool } = require('../config/database');
+    const [processing] = await promisePool.query(
+      'SELECT id, status, created_at FROM product_promotions WHERE user_id = ? AND status = ? ORDER BY created_at DESC',
+      [userId, 'processing']
+    );
+    res.json({ success: true, hasProcessing: processing.length > 0, processingCount: processing.length, items: processing });
+  } catch (error) {
+    console.error('Error getting processing status:', error);
+    res.status(500).json({ success: false, message: 'Failed to get status' });
+  }
+}
+
   static async checkStatus(req, res) {
     try {
       const { requestId } = req.params;

@@ -1,0 +1,698 @@
+<!-- ================================================================ -->
+<!-- FILE: views/partials/notification-bar.ejs -->
+<!-- Include this in your layout or at the end of each page -->
+<!-- ================================================================ -->
+
+<style>
+  /* Notification Bar Container */
+  .notification-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    max-height: 60vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .notification-bar.active {
+    transform: translateY(0);
+  }
+
+  .notification-bar.minimized {
+    transform: translateY(calc(100% - 56px));
+  }
+
+  .notification-bar.minimized.active {
+    transform: translateY(0);
+  }
+
+  .notification-bar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .notification-bar-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+
+  .notification-count {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  .notification-toggle {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+  }
+
+  .notification-bar:not(.minimized) .notification-toggle {
+    transform: rotate(180deg);
+  }
+
+  .notification-bar-content {
+    overflow-y: auto;
+    max-height: calc(60vh - 56px);
+    padding: 1rem;
+    background: #f9fafb;
+  }
+
+  .notification-bar.minimized .notification-bar-content {
+    display: none;
+  }
+
+  /* Task Item */
+  .task-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    animation: slideInUp 0.3s ease;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .task-item.completed {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-color: #6ee7b7;
+  }
+
+  .task-item.failed {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #fecaca;
+  }
+
+  .task-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .task-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #374151;
+  }
+
+  .task-type-icon {
+    font-size: 1.25rem;
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .task-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .task-status-badge.processing {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .task-status-badge.completed {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .task-status-badge.failed {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .task-prompt {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+  }
+
+  .task-progress-container {
+    margin-bottom: 0.5rem;
+  }
+
+  .task-progress-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .task-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 9999px;
+    transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .task-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .task-progress-fill.completed {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  }
+
+  .task-progress-fill.completed::after {
+    display: none;
+  }
+
+  .task-progress-fill.failed {
+    background: #ef4444;
+  }
+
+  .task-progress-fill.failed::after {
+    display: none;
+  }
+
+  .task-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+
+  .task-time {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .task-message {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .task-message.completed {
+    color: #10b981;
+  }
+
+  .task-message.failed {
+    color: #ef4444;
+  }
+
+  /* Floating Notification Badge */
+  .floating-notification {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: fadeIn 0.5s ease, float 3s ease-in-out infinite;
+    transition: var(--transition);
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .floating-notification:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+  }
+
+  .floating-notification.hidden {
+    display: none;
+  }
+
+  .floating-notification-icon {
+    font-size: 1.5rem;
+    animation: pulse 2s infinite;
+  }
+
+  .floating-notification-text {
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .floating-notification-count {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .notification-bar-content {
+      padding: 0.75rem;
+    }
+
+    .task-item {
+      padding: 0.75rem;
+    }
+
+    .floating-notification {
+      bottom: 5rem;
+      right: 1rem;
+      padding: 0.75rem 1.25rem;
+    }
+
+    .notification-bar {
+      max-height: 50vh;
+    }
+
+    .notification-bar.minimized {
+      transform: translateY(calc(100% - 48px));
+    }
+  }
+
+  /* Empty State */
+  .empty-tasks {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #9ca3af;
+  }
+
+  .empty-tasks-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+    animation: pulse 2s infinite;
+  }
+
+  /* Pulse animation for badges */
+  .notification-count.has-tasks {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+</style>
+
+<!-- Floating Notification Badge -->
+<div id="floatingNotification" class="floating-notification hidden" onclick="toggleNotificationBar()">
+  <div class="floating-notification-icon">⚡</div>
+  <div class="floating-notification-text">
+    <span id="floatingTaskCount">0</span> task<span id="floatingTaskPlural">s</span> processing
+  </div>
+</div>
+
+<!-- Notification Bar -->
+<div id="notificationBar" class="notification-bar minimized">
+  <div class="notification-bar-header" onclick="toggleNotificationBar()">
+    <div class="notification-bar-title">
+      <span>⚡</span>
+      <span>Active Tasks</span>
+      <span id="taskCount" class="notification-count">0</span>
+    </div>
+    <span class="notification-toggle">▼</span>
+  </div>
+  
+  <div class="notification-bar-content" id="notificationBarContent">
+    <div class="empty-tasks">
+      <div class="empty-tasks-icon">✨</div>
+      <p style="font-size: 0.9375rem; color: #6b7280; font-weight: 500;">No active tasks</p>
+      <p style="font-size: 0.8125rem; color: #9ca3af; margin-top: 0.25rem;">Your generations will appear here</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Global notification system
+const NotificationSystem = {
+  tasks: new Map(),
+  pollInterval: null,
+  isMinimized: true,
+  
+  init() {
+    this.startPolling();
+    this.updateUI();
+    
+    // Load minimized state from localStorage
+    const savedState = localStorage.getItem('notificationBarMinimized');
+    if (savedState !== null) {
+      this.isMinimized = savedState === 'true';
+      const bar = document.getElementById('notificationBar');
+      if (!this.isMinimized) {
+        bar.classList.remove('minimized');
+      }
+    }
+  },
+  
+  startPolling() {
+    // Check every 5 seconds
+    this.pollInterval = setInterval(() => {
+      this.fetchAllProcessingTasks();
+    }, 5000);
+    
+    // Initial fetch
+    this.fetchAllProcessingTasks();
+  },
+  
+  stopPolling() {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+  },
+  
+  async fetchAllProcessingTasks() {
+    try {
+      const endpoints = [
+        { url: '/persona/processing-status', type: 'Persona', icon: '🎨' },
+        { url: '/promotion/processing-status', type: 'Product Promotion', icon: '🛍️' },
+        { url: '/video-ai/processing-status', type: 'Video AI', icon: '🎬' },
+        { url: '/product-shot/processing-status', type: 'Product Shot', icon: '📸' }
+      ];
+      
+      const currentTaskIds = new Set();
+      
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(endpoint.url);
+          if (!response.ok) continue;
+          
+          const data = await response.json();
+          
+          if (data.success && data.items && data.items.length > 0) {
+            data.items.forEach(item => {
+              const taskId = `${endpoint.type}-${item.id}`;
+              currentTaskIds.add(taskId);
+              this.addOrUpdateTask(item, endpoint.type, endpoint.icon);
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching ${endpoint.type}:`, error);
+        }
+      }
+      
+      // Mark tasks as completed if they're no longer in processing list
+      this.tasks.forEach((task, taskId) => {
+        if (task.status === 'processing' && !currentTaskIds.has(taskId)) {
+          task.status = 'completed';
+          task.progress = 100;
+          if (!task.completedAt) {
+            task.completedAt = Date.now();
+          }
+        }
+      });
+      
+      // Remove old completed/failed tasks
+      this.cleanupTasks();
+      this.updateUI();
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  },
+  
+  addOrUpdateTask(item, type, icon) {
+    const taskId = `${type}-${item.id}`;
+    const existing = this.tasks.get(taskId);
+    
+    if (!existing) {
+      this.tasks.set(taskId, {
+        id: item.id,
+        type: type,
+        icon: icon,
+        status: item.status,
+        createdAt: new Date(item.created_at),
+        prompt: this.getPrompt(item),
+        progress: 10
+      });
+    } else {
+      existing.status = item.status;
+      
+      // Update progress based on time elapsed
+      const elapsed = Date.now() - existing.createdAt.getTime();
+      const maxTime = type === 'Video AI' ? 180000 : 60000; // 3min for video, 1min for others
+      const calculatedProgress = Math.min(90, (elapsed / maxTime) * 100);
+      
+      if (existing.status === 'processing') {
+        existing.progress = Math.max(existing.progress, calculatedProgress);
+      } else if (existing.status === 'completed') {
+        existing.progress = 100;
+      }
+    }
+  },
+  
+  getPrompt(item) {
+    return item.prompt || item.scene_description || item.description || 'Generating content...';
+  },
+  
+  cleanupTasks() {
+    const now = Date.now();
+    const toDelete = [];
+    
+    this.tasks.forEach((task, taskId) => {
+      // Remove completed/failed tasks after 15 seconds
+      if (task.status === 'completed' || task.status === 'failed') {
+        if (!task.completedAt) {
+          task.completedAt = now;
+        } else if (now - task.completedAt > 15000) {
+          toDelete.push(taskId);
+        }
+      }
+      
+      // Remove very old processing tasks (>2 hours)
+      const age = now - task.createdAt.getTime();
+      if (task.status === 'processing' && age > 7200000) {
+        task.status = 'failed';
+        task.completedAt = now;
+      }
+    });
+    
+    toDelete.forEach(taskId => this.tasks.delete(taskId));
+  },
+  
+  updateUI() {
+    const allTasks = Array.from(this.tasks.values());
+    const processingTasks = allTasks.filter(t => t.status === 'processing');
+    const count = processingTasks.length;
+    
+    // Update counters
+    const taskCountEl = document.getElementById('taskCount');
+    const floatingCountEl = document.getElementById('floatingTaskCount');
+    const taskPluralEl = document.getElementById('floatingTaskPlural');
+    
+    taskCountEl.textContent = count;
+    floatingCountEl.textContent = count;
+    taskPluralEl.textContent = count === 1 ? '' : 's';
+    
+    // Add pulse animation to badge if has tasks
+    if (count > 0) {
+      taskCountEl.classList.add('has-tasks');
+    } else {
+      taskCountEl.classList.remove('has-tasks');
+    }
+    
+    // Show/hide floating notification and bar
+    const floating = document.getElementById('floatingNotification');
+    const bar = document.getElementById('notificationBar');
+    
+    if (count > 0) {
+      floating.classList.remove('hidden');
+      bar.classList.add('active');
+    } else {
+      floating.classList.add('hidden');
+      // Keep bar visible if user opened it manually
+      if (allTasks.length === 0) {
+        setTimeout(() => {
+          if (processingTasks.length === 0) {
+            bar.classList.remove('active');
+          }
+        }, 3000);
+      }
+    }
+    
+    // Render tasks
+    this.renderTasks();
+  },
+  
+  renderTasks() {
+    const container = document.getElementById('notificationBarContent');
+    const allTasks = Array.from(this.tasks.values()).sort((a, b) => {
+      // Sort: processing first, then by creation time (newest first)
+      if (a.status === 'processing' && b.status !== 'processing') return -1;
+      if (a.status !== 'processing' && b.status === 'processing') return 1;
+      return b.createdAt - a.createdAt;
+    });
+    
+    if (allTasks.length === 0) {
+      container.innerHTML = `
+        <div class="empty-tasks">
+          <div class="empty-tasks-icon">✨</div>
+          <p style="font-size: 0.9375rem; color: #6b7280; font-weight: 500;">No active tasks</p>
+          <p style="font-size: 0.8125rem; color: #9ca3af; margin-top: 0.25rem;">Your generations will appear here</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const html = allTasks.map(task => this.renderTask(task)).join('');
+    container.innerHTML = html;
+  },
+  
+  renderTask(task) {
+    const statusClass = task.status;
+    const timeAgo = this.getTimeAgo(task.createdAt);
+    const progress = task.progress;
+    
+    let statusBadge = '';
+    let statusMessage = '';
+    
+    if (task.status === 'processing') {
+      statusBadge = '<span class="task-status-badge processing">⏳ Processing</span>';
+      statusMessage = '';
+    } else if (task.status === 'completed') {
+      statusBadge = '<span class="task-status-badge completed">✓ Completed</span>';
+      statusMessage = '<span class="task-message completed">✓ Done! Check history</span>';
+    } else if (task.status === 'failed') {
+      statusBadge = '<span class="task-status-badge failed">✗ Failed</span>';
+      statusMessage = '<span class="task-message failed">✗ Generation failed</span>';
+    }
+    
+    return `
+      <div class="task-item ${statusClass}">
+        <div class="task-header">
+          <div class="task-type">
+            <span class="task-type-icon">${task.icon}</span>
+            <span>${task.type}</span>
+          </div>
+          ${statusBadge}
+        </div>
+        
+        <div class="task-prompt">${task.prompt}</div>
+        
+        <div class="task-progress-container">
+          <div class="task-progress-bar">
+            <div class="task-progress-fill ${statusClass}" style="width: ${progress}%"></div>
+          </div>
+        </div>
+        
+        <div class="task-meta">
+          <div class="task-time">
+            <span>🕐</span>
+            <span>${timeAgo}</span>
+          </div>
+          ${statusMessage}
+        </div>
+      </div>
+    `;
+  },
+  
+  getTimeAgo(date) {
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    
+    if (seconds < 5) return 'just now';
+    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return date.toLocaleDateString('id-ID');
+  }
+};
+
+function toggleNotificationBar() {
+  const bar = document.getElementById('notificationBar');
+  bar.classList.toggle('minimized');
+  
+  NotificationSystem.isMinimized = bar.classList.contains('minimized');
+  localStorage.setItem('notificationBarMinimized', NotificationSystem.isMinimized);
+}
+
+// Initialize on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    NotificationSystem.init();
+  });
+} else {
+  NotificationSystem.init();
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  NotificationSystem.stopPolling();
+});
+
+// Pause polling when page is hidden, resume when visible
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    NotificationSystem.stopPolling();
+  } else {
+    NotificationSystem.startPolling();
+  }
+});
+</script>

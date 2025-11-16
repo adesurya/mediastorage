@@ -9,5 +9,5 @@ router.post('/optimize', authMiddleware, VideoAIController.optimizePrompt);
 router.post('/generate', authMiddleware, VideoAIController.generateVideo);
 router.get('/status/:requestId', authMiddleware, VideoAIController.checkStatus);
 router.get('/history', authMiddleware, VideoAIController.getHistory);
-
+router.get('/processing-status', authMiddleware, VideoAIController.getProcessingStatus);
 module.exports = router;
