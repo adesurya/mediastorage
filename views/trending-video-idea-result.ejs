@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Idea Result - SIJAGO+ AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 100%;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .status-transcribing {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-generating {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-failed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .loading-container {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--gray-200);
+      border-top-color: #f59e0b;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .content-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .content-box h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .result-content {
+      line-height: 1.8;
+      color: #374151;
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+    }
+
+    .result-content h2,
+    .result-content h3 {
+      color: #1f2937;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .result-content strong {
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .streaming-content {
+      min-height: 200px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: var(--radius-lg);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: none;
+      text-decoration: none;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--gray-100);
+      color: #374151;
+      border: 1px solid var(--gray-300);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-200);
+      transform: translateY(-2px);
+    }
+
+    .copy-notification {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 9999;
+      animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .copy-notification.show {
+      display: flex;
+    }
+
+    .error-box {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      border-left: 4px solid #ef4444;
+    }
+
+    .error-box h2 {
+      color: #991b1b;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .error-box p {
+      color: #991b1b;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .content-box {
+        padding: 1.5rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .copy-notification {
+        top: 1rem;
+        right: 1rem;
+        left: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar', { user: user, currentPage: 'trending-videos' }) %>
+
+  <div class="content-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">
+        <span>💡</span>
+        <span>Content Idea Generation</span>
+      </h1>
+      <p class="page-subtitle">AI-powered content strategy from trending videos</p>
+      <div id="statusBadge"></div>
+    </div>
+
+    <div id="loadingContainer" class="loading-container" style="display: none;">
+      <div class="spinner"></div>
+      <p id="loadingText" style="color: #6b7280; font-size: 1rem;"></p>
+    </div>
+
+    <div id="resultContainer"></div>
+  </div>
+
+  <!-- Copy Notification -->
+  <div id="copyNotification" class="copy-notification">
+    <span style="font-size: 1.25rem;">✓</span>
+    <span>Content copied to clipboard!</span>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const ideaId = urlParams.get('ideaId');
+    let checkInterval;
+    let generatedContent = ''; // Store the generated content for copying
+
+    async function checkStatus() {
+      try {
+        const response = await fetch(`/api/trending-videos/idea-status/${ideaId}`);
+        const data = await response.json();
+
+        if (data.success) {
+          updateStatus(data.data.status);
+
+          if (data.data.status === 'completed') {
+            clearInterval(checkInterval);
+            displayResult(data.data);
+          } else if (data.data.status === 'failed') {
+            clearInterval(checkInterval);
+            displayError(data.data.errorMessage);
+          } else if (data.data.status === 'generating' && data.data.transcriptText) {
+            clearInterval(checkInterval);
+            startStreaming();
+          }
+        }
+      } catch (error) {
+        console.error('Check status error:', error);
+      }
+    }
+
+    function updateStatus(status) {
+      const badge = document.getElementById('statusBadge');
+      const loadingText = document.getElementById('loadingText');
+      const loadingContainer = document.getElementById('loadingContainer');
+
+      let statusClass = '';
+      let statusText = '';
+      let loadingMessage = '';
+
+      switch(status) {
+        case 'transcribing':
+          statusClass = 'status-transcribing';
+          statusText = '🎯 Transcribing Video...';
+          loadingMessage = 'Extracting transcript from video... This may take 1-2 minutes.';
+          loadingContainer.style.display = 'block';
+          break;
+        case 'generating':
+          statusClass = 'status-generating';
+          statusText = '✨ Generating Ideas...';
+          loadingMessage = 'Creating content strategy...';
+          loadingContainer.style.display = 'block';
+          break;
+        case 'completed':
+          statusClass = 'status-completed';
+          statusText = '✅ Completed';
+          loadingContainer.style.display = 'none';
+          break;
+        case 'failed':
+          statusClass = 'status-failed';
+          statusText = '❌ Failed';
+          loadingContainer.style.display = 'none';
+          break;
+      }
+
+      badge.className = `status-badge ${statusClass}`;
+      badge.textContent = statusText;
+      loadingText.textContent = loadingMessage;
+    }
+
+    function startStreaming() {
+      const resultContainer = document.getElementById('resultContainer');
+      resultContainer.innerHTML = `
+        <div class="content-box">
+          <h2>📝 Generated Content Idea</h2>
+          <div class="result-content streaming-content" id="streamingContent"></div>
+        </div>
+      `;
+
+      const eventSource = new EventSource(`/api/trending-videos/idea-stream/${ideaId}`);
+      const streamingContent = document.getElementById('streamingContent');
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.error) {
+          eventSource.close();
+          displayError(data.error);
+          return;
+        }
+
+        if (data.done) {
+          eventSource.close();
+          updateStatus('completed');
+          if (data.fullContent) {
+            generatedContent = data.fullContent; // Store for copying
+            streamingContent.innerHTML = formatContent(data.fullContent);
+            addActionButtons();
+          }
+        } else {
+          streamingContent.textContent += data.chunk;
+          generatedContent += data.chunk; // Accumulate content
+        }
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        console.error('Streaming error');
+      };
+    }
+
+    function displayResult(data) {
+      const resultContainer = document.getElementById('resultContainer');
+      
+      generatedContent = data.generatedIdea || ''; // Store for copying
+      
+      const html = `
+        ${data.transcriptText ? `
+        <div class="content-box">
+          <h2>📄 Video Transcript</h2>
+          <div class="result-content">${escapeHtml(data.transcriptText)}</div>
+        </div>
+        ` : ''}
+        
+        <div class="content-box">
+          <h2>📝 Generated Content Idea</h2>
+          <div class="result-content" id="generatedIdeaContent">${formatContent(data.generatedIdea)}</div>
+        </div>
+      `;
+
+      resultContainer.innerHTML = html;
+      addActionButtons();
+    }
+
+    function addActionButtons() {
+      const resultContainer = document.getElementById('resultContainer');
+      const buttonsHtml = `
+        <div class="content-box">
+          <div class="action-buttons">
+            <button class="btn btn-success" onclick="copyContent()">
+              <span>📋</span>
+              <span>Copy Content</span>
+            </button>
+            <a href="/trending-videos" class="btn btn-primary">
+              <span>←</span>
+              <span>Back to Trending Videos</span>
+            </a>
+          </div>
+        </div>
+      `;
+      resultContainer.insertAdjacentHTML('beforeend', buttonsHtml);
+    }
+
+    function copyContent() {
+      if (!generatedContent) {
+        alert('No content to copy');
+        return;
+      }
+
+      // Create a temporary textarea to copy the text content (without HTML)
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = generatedContent;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.left = '-9999px';
+      document.body.appendChild(tempTextArea);
+      
+      try {
+        tempTextArea.select();
+        tempTextArea.setSelectionRange(0, 99999); // For mobile devices
+        
+        const successful = document.execCommand('copy');
+        
+        if (successful) {
+          showCopyNotification();
+        } else {
+          // Fallback to Clipboard API
+          copyWithClipboardAPI();
+        }
+      } catch (err) {
+        console.error('Copy failed:', err);
+        copyWithClipboardAPI();
+      } finally {
+        document.body.removeChild(tempTextArea);
+      }
+    }
+
+    function copyWithClipboardAPI() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(generatedContent)
+          .then(() => {
+            showCopyNotification();
+          })
+          .catch(err => {
+            console.error('Clipboard API failed:', err);
+            alert('Failed to copy content. Please copy manually.');
+          });
+      } else {
+        alert('Copy to clipboard is not supported in this browser. Please copy manually.');
+      }
+    }
+
+    function showCopyNotification() {
+      const notification = document.getElementById('copyNotification');
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    function formatContent(content) {
+      if (!content) return '';
+      
+      // Escape HTML first
+      const escaped = escapeHtml(content);
+      
+      // Simple markdown-like formatting
+      return escaped
+        .replace(/## (.*)/g, '<h2>$1</h2>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function displayError(message) {
+      const resultContainer = document.getElementById('resultContainer');
+      resultContainer.innerHTML = `
+        <div class="error-box">
+          <h2>❌ Generation Failed</h2>
+          <p>${escapeHtml(message || 'An error occurred during generation.')}</p>
+          <div class="action-buttons" style="margin-top: 1.5rem;">
+            <a href="/trending-videos" class="btn btn-primary">
+              <span>←</span>
+              <span>Back to Trending Videos</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    // Start checking status
+    if (ideaId) {
+      checkStatus();
+      checkInterval = setInterval(checkStatus, 3000);
+    } else {
+      displayError('No idea ID provided');
+    }
+
+    // Cleanup interval on page unload
+    window.addEventListener('beforeunload', () => {
+      if (checkInterval) {
+        clearInterval(checkInterval);
+      }
+    });
+  </script>
+</body>
+</html>

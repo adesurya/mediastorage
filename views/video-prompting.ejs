@@ -1,0 +1,708 @@
+<!-- views/video-prompting.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Prompting Generator - SIJAGO+ AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 100%;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-label-hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      font-weight: 400;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 0.875rem;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius-lg);
+      font-size: 0.9375rem;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .highlight-points-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .highlight-point-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .highlight-point-row input {
+      flex: 1;
+    }
+
+    .btn-remove {
+      padding: 0.75rem;
+      background: #fee2e2;
+      color: #991b1b;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .btn-remove:hover {
+      background: #fecaca;
+    }
+
+    .btn-add {
+      padding: 0.75rem 1.25rem;
+      background: var(--gray-100);
+      color: #374151;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-add:hover {
+      background: var(--gray-200);
+    }
+
+    .generate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .history-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .history-item {
+      background: var(--gray-50);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .history-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .history-item-header {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .history-item-date {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    .status-processing {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-failed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray-400);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .form-card,
+      .history-section {
+        padding: 1.5rem;
+      }
+
+      .history-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar', { user: user, currentPage: 'video-prompting' }) %>
+
+  <div class="content-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">
+        <span>🎬</span>
+        <span>Video Prompting Generator</span>
+      </h1>
+      <p class="page-subtitle">Create professional Veo AI video prompts with consistency</p>
+    </div>
+
+    <div class="content-grid">
+      <div class="form-card">
+        <h2 class="card-title">
+          <span>✨</span>
+          <span>Create Video Prompt</span>
+        </h2>
+
+        <form id="promptingForm">
+          <div class="form-group">
+            <label class="form-label">
+              IDE KONTEN UTAMA
+              <span class="form-label-hint">Jelaskan konsep utama konten Anda dalam 1-2 kalimat</span>
+            </label>
+            <textarea 
+              id="ideKonten" 
+              class="form-textarea" 
+              placeholder="Contoh: Review lengkap smartphone terbaru dengan fokus pada fitur kamera dan performa gaming yang luar biasa"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              HIGHLIGHT POINTS
+              <span class="form-label-hint">Poin-poin penting yang ingin disampaikan</span>
+            </label>
+            <div class="highlight-points-container" id="highlightPointsContainer">
+              <div class="highlight-point-row">
+                <input type="text" class="form-input highlight-point" placeholder="Point 1" required>
+              </div>
+              <div class="highlight-point-row">
+                <input type="text" class="form-input highlight-point" placeholder="Point 2" required>
+              </div>
+              <div class="highlight-point-row">
+                <input type="text" class="form-input highlight-point" placeholder="Point 3" required>
+              </div>
+            </div>
+            <button type="button" class="btn-add" id="addPointBtn" style="margin-top: 0.75rem;">
+              <span>+</span>
+              <span>Add Point</span>
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              URL PRODUCTS (Optional)
+              <span class="form-label-hint">Link produk untuk CTA</span>
+            </label>
+            <input 
+              type="url" 
+              id="urlProducts" 
+              class="form-input" 
+              placeholder="https://example.com/product"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              HOOK (0-5 detik)
+              <span class="form-label-hint">Kalimat pembuka yang menarik perhatian dalam Bahasa Indonesia</span>
+            </label>
+            <textarea 
+              id="hook" 
+              class="form-textarea" 
+              placeholder="Contoh: Smartphone ini mengubah cara saya bekerja dan bermain game!"
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              VALUE (5-25 detik)
+              <span class="form-label-hint">Konten inti yang memberikan value dalam Bahasa Indonesia</span>
+            </label>
+            <textarea 
+              id="value" 
+              class="form-textarea" 
+              style="min-height: 150px;"
+              placeholder="Contoh: Dengan kamera 108MP dan prosesor terbaru, setiap foto jadi seperti hasil profesional..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              CTA (25-30 detik)
+              <span class="form-label-hint">Call to action yang soft dan persuasif dalam Bahasa Indonesia</span>
+            </label>
+            <textarea 
+              id="cta" 
+              class="form-textarea" 
+              placeholder="Contoh: Kalau kamu tertarik, cek link di bio untuk info lebih lengkap!"
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit" class="generate-btn" id="generateBtn">
+            <span>🎬</span>
+            <span>Generate Video Prompts</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <h2 class="card-title">
+        <span>📜</span>
+        <span>Generation History</span>
+      </h2>
+      <div id="historyGrid" class="history-grid">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+<script>
+  const promptingForm = document.getElementById('promptingForm');
+  const generateBtn = document.getElementById('generateBtn');
+  const addPointBtn = document.getElementById('addPointBtn');
+  const highlightPointsContainer = document.getElementById('highlightPointsContainer');
+  const historyGrid = document.getElementById('historyGrid');
+
+  // Add highlight point
+  addPointBtn.addEventListener('click', () => {
+    const currentPoints = document.querySelectorAll('.highlight-point');
+    if (currentPoints.length >= 10) {
+      alert('Maximum 10 highlight points');
+      return;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'highlight-point-row';
+    row.innerHTML = `
+      <input type="text" class="form-input highlight-point" placeholder="Point ${currentPoints.length + 1}">
+      <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+    `;
+    highlightPointsContainer.appendChild(row);
+  });
+
+  // Form submission
+  promptingForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const highlightPoints = Array.from(document.querySelectorAll('.highlight-point'))
+      .map(input => input.value.trim())
+      .filter(value => value !== '');
+
+    if (highlightPoints.length < 3) {
+      alert('Please add at least 3 highlight points');
+      return;
+    }
+
+    const formData = {
+      ideKonten: document.getElementById('ideKonten').value.trim(),
+      highlightPoints: highlightPoints,
+      urlProducts: document.getElementById('urlProducts').value.trim(),
+      hook: document.getElementById('hook').value.trim(),
+      value: document.getElementById('value').value.trim(),
+      cta: document.getElementById('cta').value.trim()
+    };
+
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<span>⏳</span><span>Generating...</span>';
+
+    try {
+      const response = await fetch('/api/video-prompting/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.open(`/video-prompting-result?promptingId=${data.promptingId}`, '_blank');
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>🎬</span><span>Generate Video Prompts</span>';
+        
+        // Refresh history
+        loadHistory();
+      } else {
+        alert(data.message || 'Failed to generate prompts');
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>🎬</span><span>Generate Video Prompts</span>';
+      }
+    } catch (error) {
+      console.error('Generate error:', error);
+      alert('An error occurred. Please try again.');
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<span>🎬</span><span>Generate Video Prompts</span>';
+    }
+  });
+
+  // Load history
+  async function loadHistory() {
+    try {
+      const response = await fetch('/api/video-prompting/history?limit=20');
+      const data = await response.json();
+
+      if (data.success && data.data.length > 0) {
+        const historyHTML = data.data.map(item => {
+          let statusBadge = '';
+          let statusClass = '';
+          
+          switch(item.status) {
+            case 'processing':
+              statusClass = 'status-processing';
+              statusBadge = '⏳ Processing';
+              break;
+            case 'completed':
+              statusClass = 'status-completed';
+              statusBadge = '✅ Completed';
+              break;
+            case 'failed':
+              statusClass = 'status-failed';
+              statusBadge = '❌ Failed';
+              break;
+          }
+
+          return `
+            <div class="history-item" onclick="openResult('${item.id}', '${item.status}')">
+              <div class="history-item-header">${item.ide_konten}</div>
+              <div class="history-item-date">${new Date(item.created_at).toLocaleDateString('id-ID', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</div>
+              <div class="status-badge ${statusClass}">${statusBadge}</div>
+            </div>
+          `;
+        }).join('');
+
+        historyGrid.innerHTML = historyHTML;
+      } else {
+        historyGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <i>📭</i>
+            <p style="font-size: 1rem; color: #6b7280;">No generation history yet</p>
+            <p style="font-size: 0.875rem; margin-top: 0.5rem;">Create your first video prompt above</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Load history error:', error);
+    }
+  }
+
+  function openResult(promptingId, status) {
+    if (status === 'completed' || status === 'processing') {
+      window.open(`/video-prompting-result?promptingId=${promptingId}`, '_blank');
+    }
+  }
+
+  // Auto-fill from Product Idea - MAIN FUNCTION
+  function autoFillFromProductIdea() {
+    const savedData = sessionStorage.getItem('videoPromptingData');
+    
+    console.log('Checking sessionStorage...'); // Debug
+    console.log('Saved data:', savedData); // Debug
+    
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData);
+        console.log('Parsed data:', data); // Debug
+        
+        // Fill IDE KONTEN UTAMA
+        if (data.ideKonten) {
+          document.getElementById('ideKonten').value = data.ideKonten;
+          console.log('Filled ideKonten'); // Debug
+        }
+        
+        // Fill URL PRODUCTS
+        if (data.urlProducts) {
+          document.getElementById('urlProducts').value = data.urlProducts;
+          console.log('Filled urlProducts'); // Debug
+        }
+        
+        // Fill HOOK
+        if (data.hook) {
+          document.getElementById('hook').value = data.hook;
+          console.log('Filled hook'); // Debug
+        }
+        
+        // Fill VALUE
+        if (data.value) {
+          document.getElementById('value').value = data.value;
+          console.log('Filled value'); // Debug
+        }
+        
+        // Fill CTA
+        if (data.cta) {
+          document.getElementById('cta').value = data.cta;
+          console.log('Filled cta'); // Debug
+        }
+        
+        // Fill HIGHLIGHT POINTS - CRITICAL SECTION
+        if (data.highlightPoints && Array.isArray(data.highlightPoints) && data.highlightPoints.length > 0) {
+          console.log('Processing highlight points:', data.highlightPoints); // Debug
+          
+          const container = document.getElementById('highlightPointsContainer');
+          container.innerHTML = ''; // Clear existing inputs
+          
+          data.highlightPoints.forEach((point, index) => {
+            console.log(`Creating point ${index + 1}:`, point); // Debug
+            
+            const row = document.createElement('div');
+            row.className = 'highlight-point-row';
+            
+            // Create input
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-input highlight-point';
+            input.placeholder = `Point ${index + 1}`;
+            input.value = point;
+            input.required = index < 3; // First 3 are required
+            
+            row.appendChild(input);
+            
+            // Add remove button for points after the 3rd
+            if (index >= 3) {
+              const removeBtn = document.createElement('button');
+              removeBtn.type = 'button';
+              removeBtn.className = 'btn-remove';
+              removeBtn.textContent = '×';
+              removeBtn.onclick = function() {
+                this.parentElement.remove();
+              };
+              row.appendChild(removeBtn);
+            }
+            
+            container.appendChild(row);
+          });
+          
+          console.log('Highlight points filled successfully'); // Debug
+        } else {
+          console.log('No highlight points to fill'); // Debug
+        }
+        
+        // Clear sessionStorage after use
+        sessionStorage.removeItem('videoPromptingData');
+        console.log('SessionStorage cleared'); // Debug
+        
+        // Show success notification
+        showNotification('✅ Data has been auto-filled from Product Idea Generator!');
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+      } catch (error) {
+        console.error('Error parsing saved data:', error);
+        alert('Error loading data from Product Idea. Please try again.');
+      }
+    } else {
+      console.log('No saved data found in sessionStorage'); // Debug
+    }
+  }
+
+  // Show notification helper
+  function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.3s ease;
+    `;
+    notification.innerHTML = `
+      <span style="font-size: 1.25rem;">✓</span>
+      <span>${message}</span>
+    `;
+    
+    // Add animation style
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = 'slideIn 0.3s ease reverse';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, initializing...'); // Debug
+    
+    // Load history
+    loadHistory();
+    
+    // Check for auto-fill data
+    autoFillFromProductIdea();
+  });
+</script>
+</body>
+</html>

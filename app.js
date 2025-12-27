@@ -1,3 +1,5 @@
+// app.js - FIXED VERSION
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -12,7 +14,7 @@ const ProductShot = require('./models/ProductShot');
 require('dotenv').config();
 const backgroundWorker = require('./backgroundWorker');
 
-const { initDatabase } = require('./config/database');
+const { initDatabase, promisePool } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
@@ -23,6 +25,11 @@ const personaRoutes = require('./routes/personaRoutes');
 const productPromotionRoutes = require('./routes/productPromotionRoutes');
 const videoAIRoutes = require('./routes/videoAIRoutes');
 const productShotRoutes = require('./routes/productShotRoutes');
+
+// Import trending video routes - FIXED
+const initTrendingVideoRoutes = require('./routes/trendingVideoRoutes');
+const initVideoPromptingRoutes = require('./routes/videoPromptingRoutes');
+const initProductIdeaRoutes = require('./routes/productIdeaRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -47,7 +54,6 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 // CORS untuk uploads - akses publik
 app.use('/uploads', cors({
   origin: '*',
@@ -69,6 +75,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 
+// Original routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/api/users', userRoutes);
@@ -89,24 +96,76 @@ app.use('/api/video-ai', videoAIRoutes);
 app.use('/product-shot', productShotRoutes);
 app.use('/api/product-shot', productShotRoutes);
 
+// Trending Videos routes - FIXED
+app.use('/api/trending-videos', initTrendingVideoRoutes(promisePool));
+app.use('/api/video-prompting', initVideoPromptingRoutes(promisePool));
+app.use('/api/product-idea', initProductIdeaRoutes(promisePool));
+
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
 
 app.get('/', (req, res) => {
-  req.session.userId ? res.redirect('/dashboard') : res.redirect('/auth/login');
+  req.session.userId ? res.redirect('/trending-videos') : res.redirect('/auth/login');
 });
 
+// Redirect to trending videos after login
 app.get('/dashboard', (req, res) => {
   if (!req.session.userId) return res.redirect('/auth/login');
-  res.redirect('/media');
+  res.redirect('/trending-videos');
+});
+
+// Trending Videos page
+app.get('/trending-videos', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('trending-videos', { 
+    user: req.session.user || { username: 'User', role: 'user' },
+    userId: req.session.userId 
+  });
+});
+
+// Trending Video Idea Result page
+app.get('/trending-video-idea-result', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('trending-video-idea-result', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/video-prompting', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('video-prompting', { 
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/video-prompting-result', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('video-prompting-result', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/product-idea', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('product-idea', { 
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/product-idea-result', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('product-idea-result', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
 });
 
 app.use('/previews', (req, res, next) => {
-  res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours cache
+  res.setHeader('Cache-Control', 'public, max-age=86400');
   res.setHeader('Expires', new Date(Date.now() + 86400000).toUTCString());
   next();
 }, express.static(path.join(__dirname, 'public/previews')));
 
 backgroundWorker.start();
+
 process.on('SIGINT', () => {
   console.log('\n🛑 Shutting down server...');
   backgroundWorker.stop();
@@ -118,6 +177,10 @@ process.on('SIGTERM', () => {
   backgroundWorker.stop();
   process.exit(0);
 });
+
 app.listen(PORT, () => {
   console.log(`Server: http://localhost:${PORT}`);
+  console.log(`🔥 Trending Videos: http://localhost:${PORT}/trending-videos`);
 });
+
+module.exports = app;

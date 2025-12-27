@@ -1,5 +1,9 @@
-const jwt = require('jsonwebtoken');
+// middleware/auth.js
+// Session-based authentication middleware
 
+/**
+ * Authentication middleware untuk halaman web (redirect ke login jika tidak authenticated)
+ */
 const authMiddleware = (req, res, next) => {
   if (req.session && req.session.userId) {
     return next();
@@ -7,26 +11,44 @@ const authMiddleware = (req, res, next) => {
   return res.redirect('/auth/login');
 };
 
+/**
+ * Authentication middleware untuk API routes (return JSON error jika tidak authenticated)
+ */
 const apiAuthMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1] || req.cookies.token;
-
-  if (!token) {
-    return res.status(401).json({ 
-      success: false, 
-      message: 'Authentication required' 
-    });
+  if (req.session && req.session.userId) {
+    // Attach user info to request for API handlers
+    req.user = {
+      id: req.session.userId,
+      username: req.session.user?.username,
+      email: req.session.user?.email,
+      role: req.session.user?.role
+    };
+    return next();
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ 
-      success: false, 
-      message: 'Invalid or expired token' 
-    });
-  }
+  return res.status(401).json({ 
+    success: false, 
+    message: 'Authentication required' 
+  });
 };
 
-module.exports = { authMiddleware, apiAuthMiddleware };
+/**
+ * Optional authentication middleware (tidak require auth, tapi attach user jika authenticated)
+ */
+const optionalAuthMiddleware = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    req.user = {
+      id: req.session.userId,
+      username: req.session.user?.username,
+      email: req.session.user?.email,
+      role: req.session.user?.role
+    };
+  }
+  next();
+};
+
+module.exports = { 
+  authMiddleware, 
+  apiAuthMiddleware,
+  optionalAuthMiddleware 
+};

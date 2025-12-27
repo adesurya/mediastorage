@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trending Videos - SIJAGO+ AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 100%;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
+    .search-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 1.25rem;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 14px 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius-lg);
+      font-size: 15px;
+      transition: var(--transition);
+      background: var(--gray-50);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .search-btn {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .search-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .search-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .popular-label {
+      font-size: 13px;
+      color: #7f8c8d;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .popular-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 14px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-300);
+      border-radius: 20px;
+      font-size: 13px;
+      color: #2c3e50;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tag:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+    }
+
+    .results-header {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .results-count {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .cache-badge {
+      padding: 6px 12px;
+      background: #27ae60;
+      color: white;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .loading {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 60px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--gray-200);
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading p {
+      color: #7f8c8d;
+      font-size: 15px;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .video-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      cursor: pointer;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .video-thumbnail {
+      position: relative;
+      padding-top: 133.33%;
+      background: var(--gray-100);
+      overflow: hidden;
+    }
+
+    .video-thumbnail img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .video-card:hover .play-overlay {
+      opacity: 1;
+    }
+
+    .play-btn {
+      width: 56px;
+      height: 56px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .play-btn i {
+      color: #667eea;
+      font-size: 20px;
+      margin-left: 3px;
+    }
+
+    .video-info {
+      padding: 16px;
+    }
+
+    .video-author {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .author-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gray-200);
+    }
+
+    .author-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .video-date {
+      font-size: 11px;
+      color: #95a5a6;
+      margin-top: 2px;
+    }
+
+    .video-description {
+      font-size: 13px;
+      color: #7f8c8d;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 40px;
+    }
+
+    .video-stats {
+      display: flex;
+      gap: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #95a5a6;
+    }
+
+    .stat-item i {
+      font-size: 14px;
+    }
+
+    .pagination {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .page-btn {
+      padding: 8px 14px;
+      border: 1px solid var(--gray-300);
+      background: white;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .page-btn:hover {
+      background: var(--gray-50);
+      border-color: var(--primary);
+    }
+
+    .page-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: auto;
+      animation: zoomIn 0.3s ease;
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--gray-100);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 18px;
+      color: #7f8c8d;
+    }
+
+    .close-btn:hover {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-video {
+      width: 100%;
+      border-radius: var(--radius);
+      background: black;
+    }
+
+    .empty-state {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 60px 30px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .empty-state i {
+      font-size: 64px;
+      color: #bdc3c7;
+      margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1400px) {
+      .video-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 992px) {
+      .video-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .video-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .search-container {
+        flex-direction: column;
+      }
+
+      .search-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar', { user: user, currentPage: 'trending-videos' }) %>
+
+  <div class="content-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">
+        <span>🔥</span>
+        <span>Trending Videos</span>
+      </h1>
+      <p class="page-subtitle">Discover trending TikTok videos with SIJAGO AI+</p>
+    </div>
+
+    <div class="search-section">
+      <div class="search-container">
+        <input 
+          type="text" 
+          class="search-input" 
+          id="searchInput" 
+          placeholder="Search for trending videos..."
+          autocomplete="off"
+        >
+        <button class="search-btn" id="searchBtn">
+          <i class="fas fa-search"></i>
+          Search
+        </button>
+      </div>
+      <div id="popularSearches"></div>
+    </div>
+
+    <div id="resultsHeader" style="display: none;"></div>
+
+    <div id="loadingState" style="display: none;">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Searching trending videos...</p>
+      </div>
+    </div>
+
+    <div id="videoGrid" class="video-grid"></div>
+
+    <div id="emptyState" class="empty-state">
+      <i class="fas fa-video"></i>
+      <h3>No videos yet</h3>
+      <p>Enter a search query above to discover trending videos</p>
+    </div>
+
+    <div id="pagination" style="display: none;"></div>
+  </div>
+
+  <div class="modal" id="videoModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">Video Player</h3>
+      <button class="close-btn" id="closeModal">×</button>
+    </div>
+    <div class="modal-body">
+      <video id="modalVideo" class="modal-video" controls autoplay></video>
+      <div style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+        <button id="generateIdeaBtn" class="generate-idea-btn" style="
+          flex: 1;
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          color: white;
+          border: none;
+          border-radius: var(--radius-lg);
+          padding: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: var(--transition);
+          box-shadow: var(--shadow);
+        ">
+          💡 Generate Idea
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    let currentVideos = [];
+    let currentPage = 1;
+    let currentQuery = '';
+    const VIDEOS_PER_PAGE = 20;
+    const API_BASE = '/api/trending-videos';
+
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const videoGrid = document.getElementById('videoGrid');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const resultsHeader = document.getElementById('resultsHeader');
+    const pagination = document.getElementById('pagination');
+    const videoModal = document.getElementById('videoModal');
+    const modalVideo = document.getElementById('modalVideo');
+    const modalTitle = document.getElementById('modalTitle');
+    const closeModal = document.getElementById('closeModal');
+    const popularSearches = document.getElementById('popularSearches');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadPopularSearches();
+      
+      searchBtn.addEventListener('click', handleSearch);
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSearch();
+      });
+
+      closeModal.addEventListener('click', closeVideoModal);
+      videoModal.addEventListener('click', (e) => {
+        if (e.target === videoModal) closeVideoModal();
+      });
+    });
+
+    function formatDate(timestamp) {
+      const date = new Date(timestamp * 1000);
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${month}/${day}/${year}`;
+    }
+
+    async function loadPopularSearches() {
+      try {
+        const response = await fetch(`${API_BASE}/popular?limit=8`);
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+          const html = `
+            <span class="popular-label">Popular Searches:</span>
+            <div class="popular-tags">
+              ${data.data.map(item => `
+                <div class="tag" onclick="searchFromTag('${item.query}')">
+                  ${item.query} <span style="opacity: 0.6;">(${item.search_count})</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          popularSearches.innerHTML = html;
+        }
+      } catch (error) {
+        console.error('Failed to load popular searches:', error);
+      }
+    }
+
+    function searchFromTag(query) {
+      searchInput.value = query;
+      handleSearch();
+    }
+
+    async function handleSearch() {
+      const query = searchInput.value.trim();
+      
+      if (!query) {
+        alert('Please enter a search query');
+        return;
+      }
+
+      currentQuery = query;
+      currentPage = 1;
+
+      emptyState.style.display = 'none';
+      videoGrid.innerHTML = '';
+      resultsHeader.style.display = 'none';
+      pagination.style.display = 'none';
+      loadingState.style.display = 'block';
+      searchBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/search?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        if (data.success && data.data.videos.length > 0) {
+          currentVideos = data.data.videos;
+          displayResults(data.data);
+          loadPopularSearches();
+        } else {
+          showEmptyResults();
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        alert('Failed to search videos. Please try again.');
+      } finally {
+        loadingState.style.display = 'none';
+        searchBtn.disabled = false;
+      }
+    }
+
+    function displayResults(data) {
+      resultsHeader.innerHTML = `
+        <div class="results-count">
+          Found ${data.pagination.total} videos for "${data.query}"
+        </div>
+      `;
+      resultsHeader.style.display = 'flex';
+
+      displayVideos(data.videos);
+
+      if (data.pagination.totalPages > 1) {
+        displayPagination(data.pagination);
+      }
+    }
+
+    function displayVideos(videos) {
+      videoGrid.innerHTML = videos.map(video => `
+        <div class="video-card" onclick='playVideo(${JSON.stringify(video).replace(/'/g, "&#39;")})'>
+          <div class="video-thumbnail">
+            <img src="${video.cover}" alt="${video.description}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\'%3E%3Crect fill=\'%23ecf0f1\' width=\'400\' height=\'300\'/%3E%3Ctext fill=\'%23bdc3c7\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' font-family=\'Arial\' font-size=\'16\'%3ENo Image%3C/text%3E%3C/svg%3E'">
+            <div class="play-overlay">
+              <div class="play-btn">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+          </div>
+          <div class="video-info">
+            <div class="video-author">
+              <img src="${video.avatar_thumb}" alt="${video.author_name}" class="author-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'32\' height=\'32\'%3E%3Crect fill=\'%23ecf0f1\' width=\'32\' height=\'32\'/%3E%3C/svg%3E'">
+              <div>
+                <div class="author-name">${video.author_name}</div>
+                <div class="video-date"><i class="far fa-calendar"></i> ${formatDate(video.create_time)}</div>
+              </div>
+            </div>
+            <div class="video-description">${video.description || 'No description'}</div>
+            <div class="video-stats">
+              <div class="stat-item" title="Hearts">
+                <i class="fas fa-heart"></i>
+                ${formatNumber(video.statistics.hearts)}
+              </div>
+              <div class="stat-item" title="Comments">
+                <i class="fas fa-comment"></i>
+                ${formatNumber(video.statistics.comments)}
+              </div>
+              <div class="stat-item" title="Plays">
+                <i class="fas fa-play-circle"></i>
+                ${formatNumber(video.statistics.plays)}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function displayPagination(paginationData) {
+      const { page, totalPages } = paginationData;
+      let html = '';
+
+      html += `<button class="page-btn" onclick="changePage(${page - 1})" ${page === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i> Prev</button>`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+          html += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+        } else if (i === page - 3 || i === page + 3) {
+          html += `<span style="padding: 10px; color: #bdc3c7;">...</span>`;
+        }
+      }
+
+      html += `<button class="page-btn" onclick="changePage(${page + 1})" ${page === totalPages ? 'disabled' : ''}>Next <i class="fas fa-chevron-right"></i></button>`;
+
+      pagination.innerHTML = html;
+      pagination.style.display = 'flex';
+    }
+
+    async function changePage(page) {
+      currentPage = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      loadingState.style.display = 'block';
+      videoGrid.innerHTML = '';
+
+      try {
+        const response = await fetch(`${API_BASE}/search?query=${encodeURIComponent(currentQuery)}&page=${page}&limit=${VIDEOS_PER_PAGE}`);
+        const data = await response.json();
+
+        if (data.success) {
+          displayResults(data.data);
+        }
+      } catch (error) {
+        console.error('Pagination error:', error);
+      } finally {
+        loadingState.style.display = 'none';
+      }
+    }
+
+    function playVideo(video) {
+      modalTitle.textContent = video.description || 'Playing Video';
+      modalVideo.src = video.download_url;
+      videoModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeVideoModal() {
+      modalVideo.pause();
+      modalVideo.src = '';
+      videoModal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    function showEmptyResults() {
+      emptyState.innerHTML = `
+        <i class="fas fa-search"></i>
+        <h3>No videos found</h3>
+        <p>Try a different search query</p>
+      `;
+      emptyState.style.display = 'block';
+    }
+
+    function formatNumber(num) {
+      if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+      }
+      if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+      }
+      return num;
+    }
+
+      let currentVideoData = null;
+
+  function playVideo(video) {
+    currentVideoData = video;
+    modalTitle.textContent = video.description || 'Playing Video';
+    modalVideo.src = video.download_url;
+    videoModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Generate Idea button handler
+  document.getElementById('generateIdeaBtn').addEventListener('click', async () => {
+    if (!currentVideoData) {
+      alert('No video selected');
+      return;
+    }
+
+    const btn = document.getElementById('generateIdeaBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Starting...';
+
+    try {
+      const response = await fetch('/api/trending-videos/generate-idea', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          videoId: currentVideoData.video_id,
+          videoUrl: currentVideoData.download_url
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Open result in new tab
+        window.open(`/trending-video-idea-result?ideaId=${data.ideaId}`, '_blank');
+        
+        // Reset button
+        btn.disabled = false;
+        btn.textContent = '💡 Generate Idea';
+      } else {
+        alert(data.message || 'Failed to start generation');
+        btn.disabled = false;
+        btn.textContent = '💡 Generate Idea';
+      }
+    } catch (error) {
+      console.error('Generate idea error:', error);
+      alert('An error occurred. Please try again.');
+      btn.disabled = false;
+      btn.textContent = '💡 Generate Idea';
+    }
+  });
+  </script>
+</body>
+</html>

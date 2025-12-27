@@ -1,0 +1,621 @@
+<!-- views/product-idea.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Idea Generator - SIJAGO+ AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .content-wrapper {
+      padding: 2rem;
+      max-width: 100%;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: #6b7280;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-label-hint {
+      font-size: 0.75rem;
+      color: #6b7280;
+      font-weight: 400;
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 0.875rem;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius-lg);
+      font-size: 0.9375rem;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .upload-zone {
+      border: 3px dashed var(--gray-300);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      text-align: center;
+      background: var(--gray-50);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.1);
+      border-width: 4px;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .upload-text {
+      font-size: 1rem;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .upload-hint {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+
+    #imageInput {
+      display: none;
+    }
+
+    .preview-container {
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .preview-container.active {
+      display: block;
+    }
+
+    .preview-wrapper {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      max-width: 300px;
+      margin: 0 auto;
+      box-shadow: var(--shadow);
+    }
+
+    .preview-image {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .remove-preview {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: var(--transition);
+    }
+
+    .remove-preview:hover {
+      background: rgb(220, 38, 38);
+      transform: scale(1.1);
+    }
+
+    .generate-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .history-section {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .history-item {
+      background: var(--gray-50);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .history-item:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .history-item-header {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .history-item-desc {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .history-item-date {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    .status-processing {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-failed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray-400);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 1rem;
+      }
+
+      .form-card,
+      .history-section {
+        padding: 1.5rem;
+      }
+
+      .history-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar', { user: user, currentPage: 'product-idea' }) %>
+
+  <div class="content-wrapper">
+    <div class="page-header">
+      <h1 class="page-title">
+        <span>💡</span>
+        <span>Product Idea Generator</span>
+      </h1>
+      <p class="page-subtitle">Generate creative content ideas from your product information</p>
+    </div>
+
+    <div class="content-grid">
+      <div class="form-card">
+        <h2 class="card-title">
+          <span>✨</span>
+          <span>Product Information</span>
+        </h2>
+
+        <form id="productForm">
+          <div class="form-group">
+            <label class="form-label">
+              NAMA PRODUK
+              <span class="form-label-hint">Nama lengkap produk Anda</span>
+            </label>
+            <input 
+              type="text" 
+              id="productName" 
+              class="form-input" 
+              placeholder="Contoh: Smartphone XYZ Pro Max"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              DESKRIPSI PRODUK
+              <span class="form-label-hint">Jelaskan detail fitur, manfaat, dan keunggulan produk</span>
+            </label>
+            <textarea 
+              id="productDescription" 
+              class="form-textarea" 
+              placeholder="Contoh: Smartphone flagship dengan kamera 108MP, prosesor terbaru, layar AMOLED 120Hz, baterai 5000mAh dengan fast charging..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              URL PRODUK (Optional)
+              <span class="form-label-hint">Link ke halaman produk</span>
+            </label>
+            <input 
+              type="url" 
+              id="productUrl" 
+              class="form-input" 
+              placeholder="https://example.com/product"
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              GAMBAR PRODUK (Optional)
+              <span class="form-label-hint">Upload gambar untuk referensi visual</span>
+            </label>
+            <div class="upload-zone" id="uploadZone">
+              <div class="upload-icon">📷</div>
+              <div class="upload-text">Click to upload or drag and drop</div>
+              <div class="upload-hint">PNG, JPG, WEBP up to 10MB</div>
+              <input type="file" id="imageInput" accept="image/jpeg,image/jpg,image/png,image/webp">
+            </div>
+            <div id="previewContainer" class="preview-container">
+              <div class="preview-wrapper">
+                <img id="previewImage" src="" alt="Preview" class="preview-image">
+                <button type="button" class="remove-preview" onclick="removeImage()">×</button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="generate-btn" id="generateBtn">
+            <span>💡</span>
+            <span>Generate Content Idea</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <h2 class="card-title">
+        <span>📜</span>
+        <span>Generation History</span>
+      </h2>
+      <div id="historyGrid" class="history-grid">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+
+  <!-- views/product-idea.ejs - UPDATE image upload section -->
+<script>
+  const productForm = document.getElementById('productForm');
+  const generateBtn = document.getElementById('generateBtn');
+  const uploadZone = document.getElementById('uploadZone');
+  const imageInput = document.getElementById('imageInput');
+  const previewContainer = document.getElementById('previewContainer');
+  const previewImage = document.getElementById('previewImage');
+  const historyGrid = document.getElementById('historyGrid');
+
+  let uploadedImageUrl = null;
+
+  // Upload zone handling
+  uploadZone.addEventListener('click', () => imageInput.click());
+
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+  });
+
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+  });
+
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      imageInput.files = e.dataTransfer.files;
+      handleImageUpload();
+    }
+  });
+
+  imageInput.addEventListener('change', () => {
+    if (imageInput.files.length) {
+      handleImageUpload();
+    }
+  });
+
+  async function handleImageUpload() {
+    const file = imageInput.files[0];
+    if (!file) return;
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImage.src = e.target.result;
+      previewContainer.classList.add('active');
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    const formData = new FormData();
+    formData.append('productImage', file);
+
+    try {
+      const response = await fetch('/api/product-idea/upload-image', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        uploadedImageUrl = data.imageUrl;
+        console.log('Image uploaded:', uploadedImageUrl);
+      } else {
+        alert('Failed to upload image: ' + data.message);
+        removeImage();
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+      removeImage();
+    }
+  }
+
+  function removeImage() {
+    uploadedImageUrl = null;
+    imageInput.value = '';
+    previewContainer.classList.remove('active');
+    previewImage.src = '';
+  }
+
+  // Form submission
+  productForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = {
+      productName: document.getElementById('productName').value.trim(),
+      productDescription: document.getElementById('productDescription').value.trim(),
+      productUrl: document.getElementById('productUrl').value.trim(),
+      productImage: uploadedImageUrl
+    };
+
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<span>⏳</span><span>Generating...</span>';
+
+    try {
+      const response = await fetch('/api/product-idea/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.open(`/product-idea-result?ideaId=${data.ideaId}`, '_blank');
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>💡</span><span>Generate Content Idea</span>';
+        loadHistory();
+      } else {
+        alert(data.message || 'Failed to generate idea');
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span>💡</span><span>Generate Content Idea</span>';
+      }
+    } catch (error) {
+      console.error('Generate error:', error);
+      alert('An error occurred. Please try again.');
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = '<span>💡</span><span>Generate Content Idea</span>';
+    }
+  });
+
+  // Load history
+  async function loadHistory() {
+    try {
+      const response = await fetch('/api/product-idea/history?limit=20');
+      const data = await response.json();
+
+      if (data.success && data.data.length > 0) {
+        const historyHTML = data.data.map(item => {
+          let statusBadge = '';
+          let statusClass = '';
+          
+          switch(item.status) {
+            case 'processing':
+              statusClass = 'status-processing';
+              statusBadge = '⏳ Processing';
+              break;
+            case 'completed':
+              statusClass = 'status-completed';
+              statusBadge = '✅ Completed';
+              break;
+            case 'failed':
+              statusClass = 'status-failed';
+              statusBadge = '❌ Failed';
+              break;
+          }
+
+          return `
+            <div class="history-item" onclick="openResult('${item.id}', '${item.status}')">
+              <div class="history-item-header">${item.product_name}</div>
+              <div class="history-item-desc">${item.product_description.substring(0, 100)}...</div>
+              <div class="history-item-date">${new Date(item.created_at).toLocaleDateString('id-ID', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</div>
+              <div class="status-badge ${statusClass}">${statusBadge}</div>
+            </div>
+          `;
+        }).join('');
+
+        historyGrid.innerHTML = historyHTML;
+      } else {
+        historyGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <i>📭</i>
+            <p style="font-size: 1rem; color: #6b7280;">No generation history yet</p>
+            <p style="font-size: 0.875rem; margin-top: 0.5rem;">Create your first product idea above</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Load history error:', error);
+    }
+  }
+
+  function openResult(ideaId, status) {
+    if (status === 'completed' || status === 'processing') {
+      window.open(`/product-idea-result?ideaId=${ideaId}`, '_blank');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadHistory);
+</script>
+</body>
+</html>
