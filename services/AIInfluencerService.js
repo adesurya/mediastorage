@@ -3,23 +3,16 @@ const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
-const LocalUpload = require('../utils/localUpload');
-
 
 class AIInfluencerService {
   constructor() {
     this.apiUrl = 'https://api.kie.ai/api/v1/jobs/createTask';
     this.apiKey = process.env.KIE_API_KEY || 'c1912a36b02a6508ddae00f41b0236cb';
     this.callbackUrl = process.env.CALLBACK_URL || 'https://plus.sijago.ai/api/ai-influencer/callback';
-    this.localUpload = new LocalUpload(this.callbackUrl);
 
     // OpenAI configuration
     this.openaiApiKey = process.env.OPENAI_API_KEY || '';
     this.openaiUrl = 'https://api.openai.com/v1/chat/completions';
-    
-    // ImgBB configuration
-    this.imgbbApiKey = process.env.IMGBB_API_KEY || '';
-    this.imgbbUrl = 'https://api.imgbb.com/1/upload';
   }
 
   // Optimize prompt using OpenAI
@@ -118,42 +111,7 @@ Output: "A hyper-realistic, close-up portrait of a 25-year-old Indonesian woman 
     }
   }
 
-  // Upload image to ImgBB
-  async uploadToImgBB(imageBuffer, filename) {
-    try {
-      if (!this.imgbbApiKey) {
-        throw new Error('ImgBB API key not configured');
-      }
-
-      const base64Image = imageBuffer.toString('base64');
-      
-      const formData = new FormData();
-      formData.append('key', this.imgbbApiKey);
-      formData.append('image', base64Image);
-      formData.append('name', filename);
-
-      const response = await axios.post(this.imgbbUrl, formData, {
-        headers: formData.getHeaders()
-      });
-
-      if (response.data.success) {
-        return {
-          success: true,
-          url: response.data.data.url
-        };
-      } else {
-        throw new Error('ImgBB upload failed');
-      }
-    } catch (error) {
-      console.error('ImgBB upload error:', error.message);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  }
-
-  // Download image from result URL
+  // Download image from result URL and save locally
   async downloadImage(imageUrl, influencerId, name) {
     try {
       const response = await axios({
@@ -175,13 +133,12 @@ Output: "A hyper-realistic, close-up portrait of a 25-year-old Indonesian woman 
 
       await fs.promises.writeFile(filepath, response.data);
 
-      // Upload to ImgBB for public URL
-      const imgbbResult = await this.uploadToImgBB(Buffer.from(response.data), filename);
+      const localPath = `/uploads/ai-influencers/${filename}`;
 
       return {
         success: true,
-        localPath: `/uploads/ai-influencers/${filename}`,
-        publicUrl: imgbbResult.success ? imgbbResult.url : `/uploads/ai-influencers/${filename}`
+        localPath: localPath,
+        publicUrl: localPath  // ✅ FIXED: Use local path instead of ImgBB URL
       };
     } catch (error) {
       console.error('Download image error:', error.message);

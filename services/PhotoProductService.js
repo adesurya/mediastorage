@@ -6,17 +6,21 @@ const path = require('path');
 
 class PhotoProductService {
   constructor() {
+    this.apiKey = process.env.KIE_AI_API_KEY;
     this.apiUrl = 'https://api.kie.ai/api/v1/jobs/createTask';
-    this.apiKey = process.env.KIE_API_KEY || 'c1912a36b02a6508ddae00f41b0236cb';
-    this.callbackUrl = process.env.CALLBACK_URL || 'https://plus.sijago.ai/api/photo-product/callback';
+    this.callbackUrl = process.env.PHOTO_PRODUCT_CALLBACK_URL || 'https://plus.sijago.ai/api/photo-product/callback';
     
     // OpenAI configuration
     this.openaiApiKey = process.env.OPENAI_API_KEY || '';
     this.openaiUrl = 'https://api.openai.com/v1/chat/completions';
     
-    // ImgBB configuration
-    this.imgbbApiKey = process.env.IMGBB_API_KEY || '';
-    this.imgbbUrl = 'https://api.imgbb.com/1/upload';
+    // Validation warnings
+    if (!this.apiKey) {
+      console.warn('⚠️ WARNING: KIE_AI_API_KEY not set in environment variables!');
+    }
+    if (this.callbackUrl.includes('your-domain.com')) {
+      console.warn('⚠️ WARNING: PHOTO_PRODUCT_CALLBACK_URL is using default placeholder! Set proper callback URL in .env');
+    }
   }
 
   // Optimize prompt using OpenAI
@@ -26,20 +30,18 @@ class PhotoProductService {
         throw new Error('OpenAI API key not configured');
       }
 
-      const systemPrompt = `You are an expert photo editing and product photography prompt optimizer. Your task is to transform user descriptions into highly detailed, professional prompts for AI image editing and generation.
+      const systemPrompt = `You are an expert AI photo product editor prompt optimizer. Your task is to transform user descriptions into highly detailed, professional prompts for AI photo editing.
 
 Guidelines:
-1. Focus on product photography elements: composition, lighting, background, angles
-2. Include specific details about hand positioning, product grip, and natural poses
-3. Add professional photography terms: depth of field, focus, lighting setup
-4. Specify background and aesthetic (clean, commercial, professional)
-5. Mention camera angles and perspectives
-6. Keep it concise but detailed (2-3 sentences max)
-7. Optimize for product showcase and commercial photography
+1. Focus on product photography and editing details
+2. Include lighting, background, composition, and styling details
+3. Specify desired effects, color grading, and post-processing
+4. Make it professional and commercial-grade
+5. Keep it concise but detailed (2-3 sentences max)
 
 Example:
-Input: "tangan pegang produk dengan background putih"
-Output: "Close-up shot of hands holding product at eye level, fingers naturally gripping the item with relaxed posture. Soft studio lighting from 45-degree angle highlighting product features and creating gentle shadows. Shallow depth of field with product in sharp focus, crisp white studio background, bright and clean commercial aesthetic with professional color grading."`;
+Input: "buat background putih dan pencahayaan bagus"
+Output: "Professional product photography with pure white seamless background, studio lighting setup with soft diffused main light and fill light to eliminate harsh shadows, crisp focus on product details with slight edge enhancement, commercial e-commerce ready presentation."`;
 
       const response = await axios.post(
         this.openaiUrl,
@@ -50,7 +52,7 @@ Output: "Close-up shot of hands holding product at eye level, fingers naturally 
             { role: 'user', content: originalPrompt }
           ],
           temperature: 0.7,
-          max_tokens: 250
+          max_tokens: 200
         },
         {
           headers: {
@@ -74,42 +76,7 @@ Output: "Close-up shot of hands holding product at eye level, fingers naturally 
     }
   }
 
-  // Upload image to ImgBB
-  async uploadToImgBB(imageBuffer, filename) {
-    try {
-      if (!this.imgbbApiKey) {
-        throw new Error('ImgBB API key not configured');
-      }
-
-      const base64Image = imageBuffer.toString('base64');
-      
-      const formData = new FormData();
-      formData.append('key', this.imgbbApiKey);
-      formData.append('image', base64Image);
-      formData.append('name', filename);
-
-      const response = await axios.post(this.imgbbUrl, formData, {
-        headers: formData.getHeaders()
-      });
-
-      if (response.data.success) {
-        return {
-          success: true,
-          url: response.data.data.url
-        };
-      } else {
-        throw new Error('ImgBB upload failed');
-      }
-    } catch (error) {
-      console.error('ImgBB upload error:', error.message);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  }
-
-  // Save uploaded image locally and upload to ImgBB
+  // Save uploaded image locally
   async processUploadedImage(file, productId, imageNumber) {
     try {
       // Create directory if not exists
@@ -124,13 +91,12 @@ Output: "Close-up shot of hands holding product at eye level, fingers naturally 
       const localPath = path.join(uploadDir, filename);
       await fs.promises.writeFile(localPath, file.buffer);
 
-      // Upload to ImgBB for public URL
-      const imgbbResult = await this.uploadToImgBB(file.buffer, `${productId}_${filename}`);
+      const relativePath = `/uploads/photo-products/${productId}/${filename}`;
 
       return {
         success: true,
-        localPath: `/uploads/photo-products/${productId}/${filename}`,
-        publicUrl: imgbbResult.success ? imgbbResult.url : `/uploads/photo-products/${productId}/${filename}`
+        localPath: relativePath,
+        publicUrl: relativePath  // ✅ FIXED: Use local path instead of ImgBB URL
       };
     } catch (error) {
       console.error('Process uploaded image error:', error.message);
@@ -208,13 +174,12 @@ Output: "Close-up shot of hands holding product at eye level, fingers naturally 
 
       await fs.promises.writeFile(filepath, response.data);
 
-      // Upload to ImgBB for public URL
-      const imgbbResult = await this.uploadToImgBB(Buffer.from(response.data), filename);
+      const localPath = `/uploads/photo-products/${productId}/${filename}`;
 
       return {
         success: true,
-        localPath: `/uploads/photo-products/${productId}/${filename}`,
-        publicUrl: imgbbResult.success ? imgbbResult.url : `/uploads/photo-products/${productId}/${filename}`
+        localPath: localPath,
+        publicUrl: localPath  // ✅ FIXED: Use local path instead of ImgBB URL
       };
     } catch (error) {
       console.error('Download result image error:', error.message);

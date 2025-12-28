@@ -6,114 +6,95 @@ const path = require('path');
 
 class PhotoStudioService {
   constructor() {
-    this.apiKey = process.env.KIE_AI_API_KEY || 'c1912a36b02a6508ddae00f41b0236cb';
+    this.apiKey = process.env.KIE_AI_API_KEY;
     this.apiUrl = 'https://api.kie.ai/api/v1/jobs/createTask';
-    this.imgbbApiKey = process.env.IMGBB_API_KEY || 'c592632c8a32fd52fcba6e3c75332a28';
-    this.imgbbUrl = 'https://api.imgbb.com/1/upload';
-    this.callbackUrl = process.env.PHOTO_STUDIO_CALLBACK_URL || 'https:/plus.sijago.ai/api/photo-studio/callback';
+    this.callbackUrl = process.env.PHOTO_STUDIO_CALLBACK_URL || 'https://plus.sijago.ai/api/photo-studio/callback';
+    
+    // OpenAI configuration
+    this.openaiApiKey = process.env.OPENAI_API_KEY || '';
+    this.openaiUrl = 'https://api.openai.com/v1/chat/completions';
     
     // Validation warnings
     if (!this.apiKey) {
       console.warn('⚠️ WARNING: KIE_AI_API_KEY not set in environment variables!');
     }
-    if (!this.imgbbApiKey) {
-      console.warn('⚠️ WARNING: IMGBB_API_KEY not set in environment variables!');
-    }
     if (this.callbackUrl.includes('your-domain.com')) {
       console.warn('⚠️ WARNING: PHOTO_STUDIO_CALLBACK_URL is using default placeholder! Set proper callback URL in .env');
     }
-    
-    // Fixed prompt as per requirement
-    this.fixedPrompt = "Replace the existing product in the background image with the new product from the second image. Seamlessly integrate the new product into the scene with perfect lighting match, realistic shadows, accurate reflections on the surface, natural color grading that matches the background ambiance, professional product placement with proper perspective and scale, remove any existing product completely, maintain the original background aesthetic and mood, ensure photorealistic result with studio-quality finishing, 8k resolution, professional product photography, commercial advertising style";
   }
 
-  // Get available styles from directory
-  getAvailableStyles() {
-    const stylesDir = path.join(__dirname, '..', 'public', 'styles', 'photo-studio');
-    
-    if (!fs.existsSync(stylesDir)) {
-      fs.mkdirSync(stylesDir, { recursive: true });
-      return [];
-    }
-
+  // Optimize prompt using OpenAI
+  async optimizePrompt(originalPrompt) {
     try {
-      const files = fs.readdirSync(stylesDir);
-      const styles = files
-        .filter(file => file.endsWith('.png'))
-        .map(file => {
-          const name = path.basename(file, '.png');
-          return {
-            name: name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            filename: file,
-            path: `/styles/photo-studio/${file}`,
-            value: name
-          };
-        });
-
-      return styles;
-    } catch (error) {
-      console.error('Error reading styles directory:', error);
-      return [];
-    }
-  }
-
-  // Upload image to ImgBB
-  async uploadToImgBB(imageBuffer, filename) {
-    try {
-      if (!this.imgbbApiKey) {
-        throw new Error('ImgBB API key not configured');
+      if (!this.openaiApiKey) {
+        throw new Error('OpenAI API key not configured');
       }
 
-      const base64Image = imageBuffer.toString('base64');
-      
-      const formData = new FormData();
-      formData.append('key', this.imgbbApiKey);
-      formData.append('image', base64Image);
-      formData.append('name', filename);
+      const systemPrompt = `You are an expert AI photo studio prompt optimizer. Your task is to transform user descriptions into highly detailed, professional prompts for AI photo studio generation.
 
-      const response = await axios.post(this.imgbbUrl, formData, {
-        headers: formData.getHeaders()
-      });
+Guidelines:
+1. Focus on studio photography and background details
+2. Include lighting setup, background style, and atmosphere
+3. Specify desired mood, color palette, and composition
+4. Make it professional and studio-quality
+5. Keep it concise but detailed (2-3 sentences max)
 
-      if (response.data.success) {
-        return {
-          success: true,
-          url: response.data.data.url
-        };
-      } else {
-        throw new Error('ImgBB upload failed');
-      }
+Example:
+Input: "background modern dan pencahayaan studio"
+Output: "Professional photography studio with minimalist modern background featuring clean white walls and subtle geometric elements, three-point lighting setup with key light, fill light, and rim light for dimensional depth, commercial portrait-grade atmosphere with controlled color temperature at 5500K."`;
+
+      const response = await axios.post(
+        this.openaiUrl,
+        {
+          model: 'gpt-4',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: originalPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 200
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.openaiApiKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const optimizedPrompt = response.data.choices[0].message.content.trim();
+      return {
+        success: true,
+        optimizedPrompt
+      };
     } catch (error) {
-      console.error('ImgBB upload error:', error.message);
+      console.error('OpenAI optimization error:', error.response?.data || error.message);
       return {
         success: false,
-        error: error.message
+        error: error.response?.data?.error?.message || error.message
       };
     }
   }
 
-  // Save uploaded image locally and upload to ImgBB
-  async processUploadedImage(file, studioId, imageNumber) {
+  // Save uploaded image locally
+  async processUploadedImage(file, studioId, imageType) {
     try {
-      // Create directory if not exists
       const uploadDir = path.join(__dirname, '..', 'public', 'uploads', 'photo-studio', studioId.toString());
       
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
 
-      // Save locally
-      const filename = `image${imageNumber}_${Date.now()}.jpg`;
+      const filename = `${imageType}_${Date.now()}.jpg`;
       const localPath = path.join(uploadDir, filename);
       await fs.promises.writeFile(localPath, file.buffer);
 
-      // Upload to ImgBB for public URL
-      const imgbbResult = await this.uploadToImgBB(file.buffer, `${studioId}_${filename}`);
+      const relativePath = `/uploads/photo-studio/${studioId}/${filename}`;
 
       return {
         success: true,
-        localPath: `/uploads/photo-studio/${studioId}/${filename}`,
-        publicUrl: imgbbResult.success ? imgbbResult.url : `/uploads/photo-studio/${studioId}/${filename}`
+        localPath: relativePath,
+        publicUrl: relativePath  // ✅ FIXED: Use local path instead of ImgBB URL
       };
     } catch (error) {
       console.error('Process uploaded image error:', error.message);
@@ -122,16 +103,21 @@ class PhotoStudioService {
   }
 
   // Generate Photo Studio with kie.ai
-  async generatePhotoStudio(styleImageUrl, productImageUrl) {
+  async generatePhotoStudio(prompt, faceImageUrl, styleImageUrl = null) {
     try {
+      const imageUrls = [faceImageUrl];
+      if (styleImageUrl) {
+        imageUrls.push(styleImageUrl);
+      }
+
       const requestBody = {
-        model: 'google/nano-banana-edit',
+        model: 'seedream/4.5-edit',
         callBackUrl: this.callbackUrl,
         input: {
-          prompt: this.fixedPrompt,
-          image_urls: [styleImageUrl, productImageUrl],
-          output_format: 'png',
-          image_size: '1:1'
+          prompt: prompt,
+          image_urls: imageUrls,
+          aspect_ratio: '1:1',
+          quality: 'basic'
         }
       };
 
@@ -144,58 +130,33 @@ class PhotoStudioService {
           headers: {
             'Authorization': `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json'
-          },
-          timeout: 30000
+          }
         }
       );
-
-      console.log('Kie.ai response:', JSON.stringify(response.data, null, 2));
 
       if (response.data.code === 200) {
         return {
           success: true,
           taskId: response.data.data.taskId,
-          message: response.data.msg || response.data.message || 'Success'
+          message: response.data.message
         };
       } else {
-        const errorMsg = response.data.msg || response.data.message || 'API returned non-200 code';
-        console.error('API returned error:', response.data);
         return {
           success: false,
-          error: errorMsg
+          error: response.data.message
         };
       }
     } catch (error) {
-      // Detailed error logging
-      console.error('Photo studio generation error:');
-      console.error('- Error message:', error.message);
-      console.error('- Response status:', error.response?.status);
-      console.error('- Response data:', JSON.stringify(error.response?.data, null, 2));
-      
-      let errorMessage = 'Unknown API error';
-      
-      if (error.response) {
-        // Server responded with error
-        errorMessage = error.response.data?.msg || 
-                       error.response.data?.message || 
-                       `API Error: ${error.response.status} - ${error.response.statusText}`;
-      } else if (error.request) {
-        // Request made but no response
-        errorMessage = 'No response from API server - check network/API key';
-      } else {
-        // Error in request setup
-        errorMessage = error.message;
-      }
-      
+      console.error('Photo studio generation error:', error.response?.data || error.message);
       return {
         success: false,
-        error: errorMessage
+        error: error.response?.data?.message || error.message
       };
     }
   }
 
   // Download result image from API
-  async downloadResultImage(imageUrl, studioId, styleName) {
+  async downloadResultImage(imageUrl, studioId, sessionName) {
     try {
       const response = await axios({
         method: 'get',
@@ -209,20 +170,18 @@ class PhotoStudioService {
         fs.mkdirSync(downloadDir, { recursive: true });
       }
 
-      // Sanitize name for filename
-      const sanitizedName = styleName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      const filename = `sijagoai_${sanitizedName}_result.png`;
+      const sanitizedName = sessionName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const filename = `sijagoai_${sanitizedName}_result.jpg`;
       const filepath = path.join(downloadDir, filename);
 
       await fs.promises.writeFile(filepath, response.data);
 
-      // Upload to ImgBB for public URL
-      const imgbbResult = await this.uploadToImgBB(Buffer.from(response.data), filename);
+      const localPath = `/uploads/photo-studio/${studioId}/${filename}`;
 
       return {
         success: true,
-        localPath: `/uploads/photo-studio/${studioId}/${filename}`,
-        publicUrl: imgbbResult.success ? imgbbResult.url : `/uploads/photo-studio/${studioId}/${filename}`
+        localPath: localPath,
+        publicUrl: localPath  // ✅ FIXED: Use local path instead of ImgBB URL
       };
     } catch (error) {
       console.error('Download result image error:', error.message);
@@ -235,7 +194,6 @@ class PhotoStudioService {
     const { code, data, msg } = callbackData;
 
     if (code === 200 && data.state === 'success') {
-      // Parse resultJson
       const resultJson = JSON.parse(data.resultJson);
       
       return {

@@ -8,16 +8,11 @@ class RemoveBackgroundService {
   constructor() {
     this.apiKey = process.env.KIE_AI_API_KEY;
     this.apiUrl = 'https://api.kie.ai/api/v1/jobs/createTask';
-    this.imgbbApiKey = process.env.IMGBB_API_KEY;
-    this.imgbbUrl = 'https://api.imgbb.com/1/upload';
-    this.callbackUrl = process.env.REMOVE_BG_CALLBACK_URL || 'https://your-domain.com/api/remove-background/callback';
+    this.callbackUrl = process.env.REMOVE_BG_CALLBACK_URL || 'https://plus.sijago.ai/api/remove-background/callback';
     
     // Validation warnings
     if (!this.apiKey) {
       console.warn('⚠️ WARNING: KIE_AI_API_KEY not set in environment variables!');
-    }
-    if (!this.imgbbApiKey) {
-      console.warn('⚠️ WARNING: IMGBB_API_KEY not set in environment variables!');
     }
     if (this.callbackUrl.includes('your-domain.com')) {
       console.warn('⚠️ WARNING: REMOVE_BG_CALLBACK_URL is using default placeholder! Set proper callback URL in .env');
@@ -25,9 +20,9 @@ class RemoveBackgroundService {
   }
 
   // Process uploaded image
-  async processUploadedImage(file, backgroundId) {
+  async processUploadedImage(file, removeBgId) {
     try {
-      const uploadsDir = path.join(__dirname, '..', 'public', 'uploads', 'remove-background', backgroundId.toString());
+      const uploadsDir = path.join(__dirname, '..', 'public', 'uploads', 'remove-background', removeBgId.toString());
       
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });
@@ -40,65 +35,27 @@ class RemoveBackgroundService {
 
       fs.writeFileSync(filepath, file.buffer);
 
-      // Upload to IMGBB
-      const imgbbResult = await this.uploadToImgBB(file.buffer, filename);
+      const relativePath = `/uploads/remove-background/${removeBgId}/${filename}`;
 
       return {
         success: true,
-        localPath: `/uploads/remove-background/${backgroundId}/${filename}`,
-        publicUrl: imgbbResult.success ? imgbbResult.url : `/uploads/remove-background/${backgroundId}/${filename}`
+        localPath: relativePath,
+        publicUrl: relativePath  // ✅ FIXED: Use local path instead of ImgBB URL
       };
     } catch (error) {
       console.error('Process uploaded image error:', error.message);
-      throw new Error(`Failed to process uploaded image: ${error.message}`);
+      throw new Error(`Failed to process image: ${error.message}`);
     }
   }
 
-  // Upload image to IMGBB
-  async uploadToImgBB(imageBuffer, filename) {
-    try {
-      const base64Image = imageBuffer.toString('base64');
-
-      const formData = new FormData();
-      formData.append('key', this.imgbbApiKey);
-      formData.append('image', base64Image);
-      formData.append('name', filename);
-
-      const response = await axios.post(
-        this.imgbbUrl,
-        formData,
-        {
-          headers: formData.getHeaders(),
-          timeout: 30000
-        }
-      );
-
-      if (response.data.success) {
-        return {
-          success: true,
-          url: response.data.data.url,
-          deleteUrl: response.data.data.delete_url
-        };
-      } else {
-        throw new Error('IMGBB upload failed');
-      }
-    } catch (error) {
-      console.error('IMGBB upload error:', error.message);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
-  }
-
-  // Generate remove background with kie.ai
-  async generateRemoveBackground(imageUrl) {
+  // Remove background using kie.ai
+  async removeBackground(imageUrl) {
     try {
       const requestBody = {
-        model: 'recraft/remove-background',
+        model: 'z-matting',
         callBackUrl: this.callbackUrl,
         input: {
-          image: imageUrl
+          image_url: imageUrl
         }
       };
 
@@ -111,54 +68,33 @@ class RemoveBackgroundService {
           headers: {
             'Authorization': `Bearer ${this.apiKey}`,
             'Content-Type': 'application/json'
-          },
-          timeout: 30000
+          }
         }
       );
-
-      console.log('Kie.ai remove background response:', JSON.stringify(response.data, null, 2));
 
       if (response.data.code === 200) {
         return {
           success: true,
           taskId: response.data.data.taskId,
-          message: response.data.msg || response.data.message || 'Success'
+          message: response.data.message
         };
       } else {
-        const errorMsg = response.data.msg || response.data.message || 'API returned non-200 code';
-        console.error('API returned error:', response.data);
         return {
           success: false,
-          error: errorMsg
+          error: response.data.message
         };
       }
     } catch (error) {
-      console.error('Remove background generation error:');
-      console.error('- Error message:', error.message);
-      console.error('- Response status:', error.response?.status);
-      console.error('- Response data:', JSON.stringify(error.response?.data, null, 2));
-      
-      let errorMessage = 'Unknown API error';
-      
-      if (error.response) {
-        errorMessage = error.response.data?.msg || 
-                       error.response.data?.message || 
-                       `API Error: ${error.response.status} - ${error.response.statusText}`;
-      } else if (error.request) {
-        errorMessage = 'No response from API server - check network/API key';
-      } else {
-        errorMessage = error.message;
-      }
-      
+      console.error('Remove background error:', error.response?.data || error.message);
       return {
         success: false,
-        error: errorMessage
+        error: error.response?.data?.message || error.message
       };
     }
   }
 
   // Download result image from API
-  async downloadResultImage(imageUrl, backgroundId) {
+  async downloadResultImage(imageUrl, removeBgId) {
     try {
       const response = await axios({
         method: 'get',
@@ -166,25 +102,23 @@ class RemoveBackgroundService {
         responseType: 'arraybuffer'
       });
 
-      const downloadDir = path.join(__dirname, '..', 'public', 'uploads', 'remove-background', backgroundId.toString());
+      const downloadDir = path.join(__dirname, '..', 'public', 'uploads', 'remove-background', removeBgId.toString());
       
       if (!fs.existsSync(downloadDir)) {
         fs.mkdirSync(downloadDir, { recursive: true });
       }
 
-      const timestamp = Date.now();
-      const filename = `sijagoai_nobg_${timestamp}.png`;
+      const filename = `result_${Date.now()}.png`;
       const filepath = path.join(downloadDir, filename);
 
       await fs.promises.writeFile(filepath, response.data);
 
-      // Upload to ImgBB for public URL
-      const imgbbResult = await this.uploadToImgBB(Buffer.from(response.data), filename);
+      const localPath = `/uploads/remove-background/${removeBgId}/${filename}`;
 
       return {
         success: true,
-        localPath: `/uploads/remove-background/${backgroundId}/${filename}`,
-        publicUrl: imgbbResult.success ? imgbbResult.url : `/uploads/remove-background/${backgroundId}/${filename}`
+        localPath: localPath,
+        publicUrl: localPath  // ✅ FIXED: Use local path instead of ImgBB URL
       };
     } catch (error) {
       console.error('Download result image error:', error.message);
@@ -217,7 +151,7 @@ class RemoveBackgroundService {
 
   // Get estimated time message
   getEstimatedTimeMessage() {
-    return 'Remove Background sedang diproses. Estimasi waktu: 1-2 menit. Anda dapat meninggalkan halaman ini, hasil akan tersimpan di history.';
+    return 'Remove Background sedang diproses. Estimasi waktu: 30-60 detik. Anda dapat meninggalkan halaman ini, hasil akan tersimpan di history.';
   }
 }
 
