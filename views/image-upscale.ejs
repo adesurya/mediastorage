@@ -1,0 +1,401 @@
+<%- include('partials/sidebar', { currentPage: 'image-upscale', user: user }) %>
+
+<style>
+  .upscale-container {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1f36;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-subtitle {
+    color: #64748b;
+    font-size: 1rem;
+  }
+
+  .upscale-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #f8fafc;
+  }
+
+  .upload-area:hover {
+    border-color: #D4AF37;
+    background: #fffbf0;
+  }
+
+  .upload-area.has-file {
+    border-color: #D4AF37;
+    background: #fffbf0;
+  }
+
+  .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .upload-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1f36;
+    margin-bottom: 0.5rem;
+  }
+
+  .upload-hint {
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+
+  .upload-input {
+    display: none;
+  }
+
+  .preview-container {
+    margin-top: 1.5rem;
+    display: none;
+  }
+
+  .preview-container.show {
+    display: block;
+  }
+
+  .preview-image {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: block;
+    margin: 0 auto;
+  }
+
+  .preview-info {
+    text-align: center;
+    margin-top: 1rem;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    margin-top: 1.5rem;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .alert-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+  }
+
+  .alert-success {
+    background: #efe;
+    border: 1px solid #cfc;
+    color: #3c3;
+  }
+
+  .alert-info {
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #1976d2;
+  }
+
+  .loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .loading-spinner.show {
+    display: block;
+  }
+
+  .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #D4AF37;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .info-box {
+    background: #f8fafc;
+    border-left: 4px solid #D4AF37;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border-radius: 4px;
+  }
+
+  .info-box h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.95rem;
+    color: #1a1f36;
+  }
+
+  .info-box ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+
+  .info-box li {
+    margin-bottom: 0.25rem;
+  }
+
+  @media (max-width: 768px) {
+    .upscale-container {
+      padding: 1rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .upload-area {
+      padding: 2rem 1rem;
+    }
+  }
+</style>
+
+<div class="upscale-container">
+  <div class="page-header">
+    <h1 class="page-title">⬆️ Upscale Resolusi</h1>
+    <p class="page-subtitle">Tingkatkan resolusi gambar hingga 4x lebih tajam dengan AI</p>
+  </div>
+
+  <div id="alertContainer"></div>
+
+  <div class="upscale-card">
+    <form id="upscaleForm">
+      <div class="form-group">
+        <label class="form-label">Upload Gambar</label>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
+          <div class="upload-icon">📤</div>
+          <p class="upload-text">Klik atau drag & drop gambar di sini</p>
+          <p class="upload-hint">PNG, JPG, GIF, WEBP - Max 10MB</p>
+        </div>
+        <input type="file" id="imageInput" class="upload-input" accept="image/*" required>
+        
+        <div id="imagePreview" class="preview-container">
+          <img id="previewImage" class="preview-image" alt="Image Preview">
+          <div class="preview-info" id="previewInfo"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn">
+        ⬆️ Upscale Image
+      </button>
+    </form>
+
+    <div class="loading-spinner" id="loadingSpinner">
+      <div class="spinner"></div>
+      <p><strong>Sedang memproses...</strong></p>
+      <p>Estimasi waktu: 1-2 menit</p>
+      <p style="font-size: 0.875rem; color: #64748b;">Anda dapat meninggalkan halaman ini. Hasil akan tersimpan di history.</p>
+    </div>
+
+    <div class="info-box">
+      <h4>📝 Cara Penggunaan:</h4>
+      <ul>
+        <li>Upload gambar yang ingin di-upscale</li>
+        <li>Klik "Upscale Image" untuk memulai proses</li>
+        <li>Tunggu 1-2 menit atau cek di <a href="/image-upscale-history">History</a></li>
+        <li>Download hasil dengan resolusi lebih tinggi</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedFile = null;
+
+// Image upload handling
+document.getElementById('imageInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    selectedFile = file;
+    
+    // Update upload area
+    document.getElementById('uploadArea').classList.add('has-file');
+    
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const preview = document.getElementById('imagePreview');
+      const image = document.getElementById('previewImage');
+      const info = document.getElementById('previewInfo');
+      
+      image.src = event.target.result;
+      
+      // Show file info
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      info.textContent = `${file.name} - ${sizeMB} MB`;
+      
+      preview.classList.add('show');
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Form submit
+document.getElementById('upscaleForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  if (!selectedFile) {
+    showAlert('Pilih gambar terlebih dahulu', 'error');
+    return;
+  }
+  
+  // Prepare FormData
+  const formData = new FormData();
+  formData.append('image', selectedFile);
+  
+  // Show loading
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('loadingSpinner').classList.add('show');
+  document.getElementById('upscaleForm').style.display = 'none';
+  
+  try {
+    const response = await fetch('/api/image-upscale/generate', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showAlert('✅ ' + data.message, 'success');
+      
+      // Show redirect message
+      setTimeout(() => {
+        showAlert('Redirecting ke history...', 'info');
+      }, 1000);
+      
+      // Redirect to history after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/image-upscale-history';
+      }, 2000);
+    } else {
+      showAlert('❌ Gagal: ' + data.message, 'error');
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('loadingSpinner').classList.remove('show');
+      document.getElementById('upscaleForm').style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Submit error:', error);
+    showAlert('❌ Error: ' + error.message, 'error');
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('loadingSpinner').classList.remove('show');
+    document.getElementById('upscaleForm').style.display = 'block';
+  }
+});
+
+// Show alert
+function showAlert(message, type) {
+  const container = document.getElementById('alertContainer');
+  const alert = document.createElement('div');
+  alert.className = `alert alert-${type}`;
+  alert.textContent = message;
+  container.appendChild(alert);
+  
+  setTimeout(() => {
+    alert.remove();
+  }, 5000);
+}
+
+// Drag & drop support
+const uploadArea = document.getElementById('uploadArea');
+
+uploadArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadArea.style.borderColor = '#D4AF37';
+  uploadArea.style.background = '#fffbf0';
+});
+
+uploadArea.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  if (!selectedFile) {
+    uploadArea.style.borderColor = '#cbd5e1';
+    uploadArea.style.background = '#f8fafc';
+  }
+});
+
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    document.getElementById('imageInput').files = files;
+    document.getElementById('imageInput').dispatchEvent(new Event('change'));
+  }
+});
+</script>
+
+</main>
+</div>
+</body>
+</html>

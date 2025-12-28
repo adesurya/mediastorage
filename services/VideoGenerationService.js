@@ -8,7 +8,7 @@ class VideoGenerationService {
   constructor() {
     this.apiUrl = 'https://api.kie.ai/api/v1/veo/generate';
     this.apiKey = 'c1912a36b02a6508ddae00f41b0236cb';
-    this.callbackUrl = process.env.CALLBACK_URL || 'http://your-server.com/api/video-generation/callback';
+    this.callbackUrl = process.env.CALLBACK_URL || 'https://plus.sijago.ai/api/video-generation/callback';
     
     // ImgBB API for temporary image hosting (get free key at https://api.imgbb.com/)
     this.imgbbApiKey = process.env.IMGBB_API_KEY || '';

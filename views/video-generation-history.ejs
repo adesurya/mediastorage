@@ -1,97 +1,111 @@
-<!-- views/video-generation-history.ejs -->
-<%- include('partials/sidebar', { currentPage: 'video-generation' }) %>
+<%- include('partials/sidebar', { currentPage: 'photo-studio-history', user: user }) %>
 
 <style>
   .history-container {
+    padding: 2rem;
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem;
   }
 
   .page-header {
+    margin-bottom: 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
   }
 
   .page-title {
     font-size: 2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    color: #1a1f36;
   }
 
   .btn-new {
     background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
     color: white;
     padding: 0.75rem 1.5rem;
-    border-radius: 12px;
-    text-decoration: none;
+    border: none;
+    border-radius: 8px;
     font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    text-decoration: none;
+    display: inline-block;
     transition: all 0.3s;
   }
 
   .btn-new:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
   }
 
   .history-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1.5rem;
   }
 
-  .history-card {
+  .studio-card {
     background: white;
     border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    border: 2px solid #f3f4f6;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: all 0.3s;
   }
 
-  .history-card:hover {
-    box-shadow: 0 8px 16px rgba(212, 175, 55, 0.15);
-    border-color: #D4AF37;
+  .studio-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   }
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 1rem;
+  .card-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #e2e8f0;
+  }
+
+  .card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #f8fafc;
+  }
+
+  .card-body {
+    padding: 1.5rem;
   }
 
   .card-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1f2937;
+    font-weight: 600;
+    color: #1a1f36;
     margin-bottom: 0.5rem;
+    font-size: 1.1rem;
   }
 
   .card-meta {
     display: flex;
     gap: 1rem;
+    margin-bottom: 1rem;
     font-size: 0.875rem;
-    color: #6b7280;
+    color: #64748b;
   }
 
   .status-badge {
     display: inline-block;
-    padding: 0.375rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 600;
+    text-transform: uppercase;
   }
 
-  .status-processing {
+  .status-pending {
     background: #fef3c7;
     color: #92400e;
+  }
+
+  .status-generating {
+    background: #dbeafe;
+    color: #1e40af;
   }
 
   .status-completed {
@@ -99,111 +113,51 @@
     color: #065f46;
   }
 
-  .status-partial {
-    background: #dbeafe;
-    color: #1e40af;
-  }
-
   .status-failed {
     background: #fee2e2;
     color: #991b1b;
   }
 
-  .scenes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+  .card-actions {
+    display: flex;
+    gap: 0.5rem;
     margin-top: 1rem;
   }
 
-  .scene-item {
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: center;
-    transition: all 0.3s;
-  }
-
-  .scene-item:hover {
-    border-color: #D4AF37;
-  }
-
-  .scene-number {
-    font-weight: 600;
-    color: #D4AF37;
-    margin-bottom: 0.5rem;
-  }
-
-  .scene-status {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .scene-pending {
-    background: #f3f4f6;
-    color: #4b5563;
-  }
-
-  .scene-processing {
-    background: #fef3c7;
-    color: #92400e;
-  }
-
-  .scene-completed {
-    background: #d1fae5;
-    color: #065f46;
-  }
-
-  .scene-failed {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-
-  .video-preview {
-    width: 100%;
-    border-radius: 8px;
-    margin-top: 0.5rem;
-  }
-
-  .download-btn {
-    background: #10b981;
-    color: white;
+  .btn {
+    flex: 1;
     padding: 0.5rem 1rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 0.875rem;
-    display: inline-block;
-    margin-top: 0.5rem;
-    transition: all 0.3s;
-  }
-
-  .download-btn:hover {
-    background: #059669;
-    transform: scale(1.05);
-  }
-
-  .delete-btn {
-    background: #ef4444;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
     border: none;
+    border-radius: 6px;
+    font-weight: 600;
     cursor: pointer;
-    font-size: 0.875rem;
     transition: all 0.3s;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
   }
 
-  .delete-btn:hover {
-    background: #dc2626;
+  .btn-download {
+    background: #D4AF37;
+    color: white;
+  }
+
+  .btn-download:hover {
+    background: #B8860B;
+  }
+
+  .btn-view {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .btn-view:hover {
+    background: #2563eb;
   }
 
   .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    color: #6b7280;
   }
 
   .empty-icon {
@@ -211,19 +165,19 @@
     margin-bottom: 1rem;
   }
 
-  .loading-spinner {
+  .loading {
     text-align: center;
-    padding: 3rem;
+    padding: 4rem;
   }
 
   .spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid #f3f4f6;
+    border: 4px solid #f3f3f3;
     border-top: 4px solid #D4AF37;
     border-radius: 50%;
+    width: 50px;
+    height: 50px;
     animation: spin 1s linear infinite;
-    margin: 0 auto;
+    margin: 0 auto 1rem;
   }
 
   @keyframes spin {
@@ -231,250 +185,178 @@
     100% { transform: rotate(360deg); }
   }
 
-  .progress-info {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #FFF9E6;
-    border-radius: 8px;
-    font-size: 0.875rem;
-  }
-
-  .expires-warning {
-    color: #dc2626;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
+  @media (max-width: 768px) {
+    .history-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
   }
 </style>
 
 <div class="history-container">
   <div class="page-header">
-    <h1 class="page-title">📋 Video Generation History</h1>
-    <a href="/video-generation" class="btn-new">
-      ➕ Buat Video Baru
-    </a>
+    <h1 class="page-title">📜 Photo Studio History</h1>
+    <a href="/photo-studio" class="btn-new">+ New Photo Studio</a>
   </div>
 
-  <div id="historyContent">
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p>Loading history...</p>
-    </div>
+  <div id="loadingState" class="loading">
+    <div class="spinner"></div>
+    <p>Loading history...</p>
   </div>
+
+  <div id="emptyState" class="empty-state" style="display: none;">
+    <div class="empty-icon">🎨</div>
+    <h3>Belum Ada History</h3>
+    <p>Mulai buat photo studio pertama Anda!</p>
+    <a href="/photo-studio" class="btn-new">Create Now</a>
+  </div>
+
+  <div id="historyGrid" class="history-grid" style="display: none;"></div>
 </div>
 
-<%- include('partials/footer') %>
-
 <script>
-  let refreshInterval;
+let pollingInterval;
 
-  async function loadHistory() {
-    try {
-      const response = await fetch('/api/video-generation/history');
-      const result = await response.json();
-
-      if (result.success) {
-        renderHistory(result.data);
+async function loadHistory() {
+  try {
+    const response = await fetch('/api/photo-studio/history?limit=50');
+    const data = await response.json();
+    
+    document.getElementById('loadingState').style.display = 'none';
+    
+    if (data.success && data.data.length > 0) {
+      document.getElementById('historyGrid').style.display = 'grid';
+      document.getElementById('emptyState').style.display = 'none';
+      
+      renderHistory(data.data);
+      
+      // Auto-refresh if any item is processing
+      const hasProcessing = data.data.some(item => 
+        item.status === 'pending' || item.status === 'generating'
+      );
+      
+      if (hasProcessing) {
+        startPolling();
       } else {
-        showError('Failed to load history');
+        stopPolling();
       }
-    } catch (error) {
-      showError(error.message);
+    } else {
+      document.getElementById('historyGrid').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'block';
     }
+  } catch (error) {
+    console.error('Load history error:', error);
+    document.getElementById('loadingState').innerHTML = '<p>Error loading history</p>';
   }
+}
 
-  function renderHistory(generations) {
-    const container = document.getElementById('historyContent');
-
-    if (generations.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🎬</div>
-          <h3>Belum ada video generation</h3>
-          <p>Mulai buat video pertama Anda!</p>
-        </div>
-      `;
-      return;
-    }
-
-    container.innerHTML = `
-      <div class="history-grid">
-        ${generations.map(gen => renderGenerationCard(gen)).join('')}
-      </div>
-    `;
-  }
-
-  function renderGenerationCard(gen) {
-    const statusClass = `status-${gen.status}`;
-    const statusText = {
-      'processing': '⏳ Processing',
-      'completed': '✅ Completed',
-      'partial': '⚠️ Partial',
-      'failed': '❌ Failed'
-    }[gen.status];
-
-    const expiresAt = new Date(gen.expires_at);
-    const now = new Date();
-    const hoursLeft = Math.floor((expiresAt - now) / (1000 * 60 * 60));
-
-    return `
-      <div class="history-card" data-id="${gen.id}">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">${gen.title}</h3>
-            <div class="card-meta">
-              <span>📅 ${new Date(gen.created_at).toLocaleString('id-ID')}</span>
-              <span>🎬 ${gen.total_scenes} scenes</span>
-              <span>✅ ${gen.completed_count || 0} completed</span>
-              ${gen.failed_count > 0 ? `<span>❌ ${gen.failed_count} failed</span>` : ''}
-            </div>
-            ${hoursLeft > 0 ? `
-              <div class="expires-warning">
-                ⏰ Akan dihapus otomatis dalam ${hoursLeft} jam
-              </div>
-            ` : ''}
-          </div>
-          <div>
-            <span class="status-badge ${statusClass}">${statusText}</span>
-          </div>
-        </div>
-
-        ${gen.status === 'processing' ? `
-          <div class="progress-info">
-            ⏳ Estimasi selesai: 2-3 menit. Auto-refresh setiap 10 detik.
-          </div>
-        ` : ''}
-
-        <div id="scenes-${gen.id}" class="scenes-grid">
-          <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p style="font-size: 0.875rem;">Loading scenes...</p>
-          </div>
-        </div>
-
-        <div style="text-align: right; margin-top: 1rem;">
-          <button class="delete-btn" onclick="deleteGeneration(${gen.id})">
-            🗑️ Hapus
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  async function loadScenes(generationId) {
-    try {
-      const response = await fetch(`/api/video-generation/generation/${generationId}`);
-      const result = await response.json();
-
-      if (result.success) {
-        renderScenes(generationId, result.data.scenes);
-      }
-    } catch (error) {
-      console.error('Failed to load scenes:', error);
-    }
-  }
-
-  function renderScenes(generationId, scenes) {
-    const container = document.getElementById(`scenes-${generationId}`);
-
-    container.innerHTML = scenes.map(scene => {
-      const statusClass = `scene-${scene.status}`;
-      const statusText = {
-        'pending': 'Pending',
-        'processing': 'Processing',
-        'completed': 'Completed',
-        'failed': 'Failed'
-      }[scene.status];
-
-      return `
-        <div class="scene-item">
-          <div class="scene-number">Scene ${scene.scene_number}</div>
-          <span class="scene-status ${statusClass}">${statusText}</span>
-
-          ${scene.status === 'completed' && scene.video_url ? `
-            <video class="video-preview" controls>
-              <source src="${scene.video_url}" type="video/mp4">
-            </video>
-            <a href="${scene.video_url}" download="sijagoai_${generationId}_scene${scene.scene_number}.mp4" class="download-btn">
-              ⬇️ Download
-            </a>
-          ` : ''}
-
-          ${scene.status === 'processing' ? `
-            <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #6b7280;">
-              ⏳ Processing...
-            </p>
-          ` : ''}
-
-          ${scene.status === 'failed' ? `
-            <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #ef4444;">
-              ${scene.error_message || 'Generation failed'}
-            </p>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
-  }
-
-  async function deleteGeneration(id) {
-    if (!confirm('Yakin ingin menghapus generation ini?')) return;
-
-    try {
-      const response = await fetch(`/api/video-generation/generation/${id}`, {
-        method: 'DELETE'
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert('✅ Generation berhasil dihapus');
-        loadHistory();
-      } else {
-        alert('❌ ' + result.message);
-      }
-    } catch (error) {
-      alert('❌ Error: ' + error.message);
-    }
-  }
-
-  function showError(message) {
-    document.getElementById('historyContent').innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">❌</div>
-        <h3>Error</h3>
-        <p>${message}</p>
-      </div>
-    `;
-  }
-
-  // Initial load
-  loadHistory();
-
-  // Load scenes for each generation after initial render
-  setTimeout(() => {
-    const cards = document.querySelectorAll('.history-card');
-    cards.forEach(card => {
-      const id = card.dataset.id;
-      loadScenes(id);
-    });
-  }, 500);
-
-  // Auto-refresh every 10 seconds if there are processing items
-  refreshInterval = setInterval(() => {
-    const processingCards = document.querySelectorAll('.status-processing');
-    if (processingCards.length > 0) {
-      loadHistory();
-      setTimeout(() => {
-        const cards = document.querySelectorAll('.history-card');
-        cards.forEach(card => {
-          const id = card.dataset.id;
-          loadScenes(id);
-        });
-      }, 500);
-    }
-  }, 10000);
-
-  // Cleanup on page unload
-  window.addEventListener('beforeunload', () => {
-    clearInterval(refreshInterval);
+function renderHistory(items) {
+  const grid = document.getElementById('historyGrid');
+  grid.innerHTML = '';
+  
+  items.forEach(item => {
+    const card = createStudioCard(item);
+    grid.appendChild(card);
   });
+}
+
+function createStudioCard(item) {
+  const card = document.createElement('div');
+  card.className = 'studio-card';
+  
+  const statusClass = `status-${item.status}`;
+  const statusText = getStatusText(item.status);
+  
+  const productImage = item.product_image_url || '/placeholder.png';
+  const resultImage = item.result_image_url || '/placeholder.png';
+  const hasResult = item.status === 'completed' && item.result_image_url;
+  
+  card.innerHTML = `
+    <div class="card-images">
+      <img src="${productImage}" class="card-image" alt="Product" onerror="this.src='/placeholder.png'">
+      <img src="${hasResult ? resultImage : productImage}" class="card-image" alt="Result" onerror="this.src='/placeholder.png'">
+    </div>
+    <div class="card-body">
+      <div class="card-title">${item.style_name}</div>
+      <div class="card-meta">
+        <span>📅 ${formatDate(item.created_at)}</span>
+        ${item.cost_time ? `<span>⏱️ ${item.cost_time}s</span>` : ''}
+      </div>
+      <span class="status-badge ${statusClass}">${statusText}</span>
+      
+      ${hasResult ? `
+        <div class="card-actions">
+          <a href="${item.result_image_url}" class="btn btn-view" target="_blank">👁️ View</a>
+          <a href="${item.result_image_url}" class="btn btn-download" download="sijagoai_${item.style_name}_${item.id}.png">⬇️ Download</a>
+        </div>
+      ` : ''}
+      
+      ${item.status === 'failed' && item.error_message ? `
+        <div style="margin-top: 1rem; padding: 0.5rem; background: #fee; border-radius: 4px; font-size: 0.875rem; color: #c33;">
+          ❌ ${item.error_message}
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  return card;
+}
+
+function getStatusText(status) {
+  const statusMap = {
+    'pending': '⏳ Pending',
+    'generating': '🔄 Processing',
+    'completed': '✅ Completed',
+    'failed': '❌ Failed'
+  };
+  return statusMap[status] || status;
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+  
+  return date.toLocaleDateString('id-ID', { 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric' 
+  });
+}
+
+function startPolling() {
+  if (!pollingInterval) {
+    pollingInterval = setInterval(loadHistory, 5000); // Refresh every 5 seconds
+  }
+}
+
+function stopPolling() {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+}
+
+// Initial load
+loadHistory();
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', stopPolling);
 </script>
+
+<%- include('partials/footer') %>

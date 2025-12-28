@@ -1,0 +1,371 @@
+<%- include('partials/sidebar', { currentPage: 'photo-studio', user: user }) %>
+
+<style>
+  .photo-studio-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1f36;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-subtitle {
+    color: #64748b;
+    font-size: 1rem;
+  }
+
+  .studio-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s;
+    background: white;
+  }
+
+  .form-select:focus {
+    outline: none;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  }
+
+  .preview-container {
+    margin-top: 1rem;
+    display: none;
+  }
+
+  .preview-container.show {
+    display: block;
+  }
+
+  .preview-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #f8fafc;
+  }
+
+  .upload-area:hover {
+    border-color: #D4AF37;
+    background: #fffbf0;
+  }
+
+  .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .upload-input {
+    display: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .alert-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+  }
+
+  .alert-success {
+    background: #efe;
+    border: 1px solid #cfc;
+    color: #3c3;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .loading-spinner.show {
+    display: block;
+  }
+
+  .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #D4AF37;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<div class="photo-studio-container">
+  <div class="page-header">
+    <h1 class="page-title">🎨 Photo Studio</h1>
+    <p class="page-subtitle">Gabungkan produk Anda dengan background style profesional</p>
+  </div>
+
+  <div id="alertContainer"></div>
+
+  <div class="studio-card">
+    <form id="studioForm">
+      <div class="grid-2">
+        <!-- Style Selection -->
+        <div class="form-group">
+          <label class="form-label">Pilih Background Style</label>
+          <select id="styleSelect" class="form-select" required>
+            <option value="">Loading styles...</option>
+          </select>
+          
+          <div id="stylePreview" class="preview-container">
+            <img id="styleImage" class="preview-image" alt="Style Preview">
+          </div>
+        </div>
+
+        <!-- Product Upload -->
+        <div class="form-group">
+          <label class="form-label">Upload Gambar Produk</label>
+          <div class="upload-area" onclick="document.getElementById('productInput').click()">
+            <div class="upload-icon">📸</div>
+            <p>Klik untuk upload gambar produk</p>
+            <small>PNG, JPG, max 10MB</small>
+          </div>
+          <input type="file" id="productInput" class="upload-input" accept="image/*" required>
+          
+          <div id="productPreview" class="preview-container">
+            <img id="productImage" class="preview-image" alt="Product Preview">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn">
+        🚀 Generate Photo Studio
+      </button>
+    </form>
+
+    <div class="loading-spinner" id="loadingSpinner">
+      <div class="spinner"></div>
+      <p>Sedang memproses... Mohon tunggu</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedStyle = null;
+
+// Load styles on page load
+async function loadStyles() {
+  try {
+    const response = await fetch('/api/photo-studio/styles');
+    const data = await response.json();
+    
+    if (data.success) {
+      const select = document.getElementById('styleSelect');
+      select.innerHTML = '<option value="">-- Pilih Style --</option>';
+      
+      data.data.forEach(style => {
+        const option = document.createElement('option');
+        option.value = style.value;
+        option.textContent = style.name;
+        option.dataset.path = style.path;
+        select.appendChild(option);
+      });
+    } else {
+      showAlert('Gagal memuat styles', 'error');
+    }
+  } catch (error) {
+    console.error('Load styles error:', error);
+    showAlert('Error loading styles: ' + error.message, 'error');
+  }
+}
+
+// Style selection change
+document.getElementById('styleSelect').addEventListener('change', function() {
+  const selectedOption = this.options[this.selectedIndex];
+  
+  if (this.value) {
+    selectedStyle = {
+      name: this.value,
+      path: selectedOption.dataset.path
+    };
+    
+    // Show preview
+    const preview = document.getElementById('stylePreview');
+    const image = document.getElementById('styleImage');
+    image.src = selectedOption.dataset.path;
+    preview.classList.add('show');
+  } else {
+    selectedStyle = null;
+    document.getElementById('stylePreview').classList.remove('show');
+  }
+});
+
+// Product image upload
+document.getElementById('productInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const preview = document.getElementById('productPreview');
+      const image = document.getElementById('productImage');
+      image.src = event.target.result;
+      preview.classList.add('show');
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Form submit
+document.getElementById('studioForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  // Validation
+  if (!selectedStyle) {
+    showAlert('Pilih background style terlebih dahulu', 'error');
+    return;
+  }
+  
+  const productInput = document.getElementById('productInput');
+  if (!productInput.files[0]) {
+    showAlert('Upload gambar produk terlebih dahulu', 'error');
+    return;
+  }
+  
+  // Prepare FormData
+  const formData = new FormData();
+  formData.append('styleName', selectedStyle.name);
+  formData.append('styleImagePath', selectedStyle.path);
+  formData.append('product_image', productInput.files[0]);
+  
+  // Show loading
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('loadingSpinner').classList.add('show');
+  
+  try {
+    const response = await fetch('/api/photo-studio/generate', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      showAlert('✅ ' + data.message + ' Redirecting ke history...', 'success');
+      
+      // Redirect to history after 2 seconds
+      setTimeout(() => {
+        window.location.href = '/photo-studio-history';
+      }, 2000);
+    } else {
+      showAlert('❌ Gagal: ' + data.message, 'error');
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('loadingSpinner').classList.remove('show');
+    }
+  } catch (error) {
+    console.error('Submit error:', error);
+    showAlert('❌ Error: ' + error.message, 'error');
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('loadingSpinner').classList.remove('show');
+  }
+});
+
+// Show alert
+function showAlert(message, type) {
+  const container = document.getElementById('alertContainer');
+  const alert = document.createElement('div');
+  alert.className = `alert alert-${type}`;
+  alert.textContent = message;
+  container.appendChild(alert);
+  
+  setTimeout(() => {
+    alert.remove();
+  }, 5000);
+}
+
+// Load styles on page load
+loadStyles();
+</script>
+
+</main>
+</div>
+</body>
+</html>

@@ -8,7 +8,7 @@ class AIInfluencerService {
   constructor() {
     this.apiUrl = 'https://api.kie.ai/api/v1/jobs/createTask';
     this.apiKey = process.env.KIE_API_KEY || 'c1912a36b02a6508ddae00f41b0236cb';
-    this.callbackUrl = process.env.CALLBACK_URL || 'http://your-server.com/api/ai-influencer/callback';
+    this.callbackUrl = process.env.CALLBACK_URL || 'https://plus.sijago.ai/api/ai-influencer/callback';
     
     // OpenAI configuration
     this.openaiApiKey = process.env.OPENAI_API_KEY || '';

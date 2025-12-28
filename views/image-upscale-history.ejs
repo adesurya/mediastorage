@@ -1,4 +1,4 @@
-<%- include('partials/sidebar', { currentPage: 'photo-product-history', user: user }) %>
+<%- include('partials/sidebar', { currentPage: 'image-upscale-history', user: user }) %>
 
 <style>
   .history-container {
@@ -80,7 +80,7 @@
     gap: 1.5rem;
   }
 
-  .product-card {
+  .upscale-card {
     background: white;
     border-radius: 16px;
     overflow: hidden;
@@ -88,7 +88,7 @@
     transition: all 0.3s;
   }
 
-  .product-card:hover {
+  .upscale-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   }
@@ -124,6 +124,7 @@
     margin-bottom: 1rem;
     font-size: 0.875rem;
     color: #64748b;
+    flex-wrap: wrap;
   }
 
   .status-badge {
@@ -172,6 +173,7 @@
     text-align: center;
     text-decoration: none;
     display: inline-block;
+    font-size: 0.875rem;
   }
 
   .btn-download {
@@ -236,13 +238,13 @@
 
 <div class="history-container">
   <div class="page-header">
-    <h1 class="page-title">📜 Photo Product History</h1>
+    <h1 class="page-title">📜 Upscale History</h1>
     <div class="header-actions">
       <div class="refresh-indicator" id="refreshIndicator">
         <div class="refresh-dot" id="refreshDot"></div>
         <span id="refreshText">Auto-refresh: OFF</span>
       </div>
-      <a href="/photo-product" class="btn-new">+ New Photo Product</a>
+      <a href="/image-upscale" class="btn-new">+ New Upscale</a>
     </div>
   </div>
 
@@ -252,10 +254,10 @@
   </div>
 
   <div id="emptyState" class="empty-state" style="display: none;">
-    <div class="empty-icon">📸</div>
+    <div class="empty-icon">⬆️</div>
     <h3>Belum Ada History</h3>
-    <p>Mulai buat photo product pertama Anda!</p>
-    <a href="/photo-product" class="btn-new">Create Now</a>
+    <p>Mulai upscale gambar pertama Anda!</p>
+    <a href="/image-upscale" class="btn-new">Create Now</a>
   </div>
 
   <div id="historyGrid" class="history-grid" style="display: none;"></div>
@@ -267,7 +269,7 @@ let refreshCountdown = 10;
 
 async function loadHistory() {
   try {
-    const response = await fetch('/api/photo-product/history?limit=50');
+    const response = await fetch('/api/image-upscale/history?limit=50');
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -324,29 +326,29 @@ function renderHistory(items) {
   grid.innerHTML = '';
   
   items.forEach(item => {
-    const card = createProductCard(item);
+    const card = createUpscaleCard(item);
     grid.appendChild(card);
   });
 }
 
-function createProductCard(item) {
+function createUpscaleCard(item) {
   const card = document.createElement('div');
-  card.className = 'product-card';
+  card.className = 'upscale-card';
   
   const statusClass = `status-${item.status}`;
   const statusText = getStatusText(item.status);
   
-  const productImage = item.product_image_url || '/placeholder.png';
+  const originalImage = item.original_image_url || '/placeholder.png';
   const resultImage = item.result_image_url || '/placeholder.png';
   const hasResult = item.status === 'completed' && item.result_image_url;
   
   card.innerHTML = `
     <div class="card-images">
-      <img src="${productImage}" class="card-image" alt="Product" onerror="this.src='/placeholder.png'" loading="lazy">
-      <img src="${hasResult ? resultImage : productImage}" class="card-image" alt="Result" onerror="this.src='/placeholder.png'" loading="lazy">
+      <img src="${originalImage}" class="card-image" alt="Original" onerror="this.src='/placeholder.png'" loading="lazy">
+      <img src="${hasResult ? resultImage : originalImage}" class="card-image" alt="Result" onerror="this.src='/placeholder.png'" loading="lazy">
     </div>
     <div class="card-body">
-      <div class="card-title">Photo Product #${item.id}</div>
+      <div class="card-title">Image Upscale #${item.id}</div>
       <div class="card-meta">
         <span>📅 ${formatDate(item.created_at)}</span>
         ${item.cost_time ? `<span>⏱️ ${item.cost_time}s</span>` : ''}
@@ -356,7 +358,7 @@ function createProductCard(item) {
       ${hasResult ? `
         <div class="card-actions">
           <a href="${item.result_image_url}" class="btn btn-view" target="_blank">👁️ View</a>
-          <a href="${item.result_image_url}" class="btn btn-download" download="sijagoai_product_${item.id}.png">⬇️ Download</a>
+          <a href="${item.result_image_url}" class="btn btn-download" download="sijagoai_upscale_${item.id}.png">⬇️ Download</a>
         </div>
       ` : ''}
       

@@ -13,6 +13,7 @@ const ProductShot = require('./models/ProductShot');
 
 require('dotenv').config();
 const backgroundWorker = require('./backgroundWorker');
+const { cleanupUploads } = require('./utils/fileCleanup');
 
 const { initDatabase, promisePool } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
@@ -35,6 +36,12 @@ const aiInfluencerRoutes = require('./routes/aiInfluencerRoutes');
 const AIInfluencerModel = require('./models/AIInfluencerModel');
 const photoProductRoutes = require('./routes/photoProductRoutes');
 const PhotoProductModel = require('./models/PhotoProductModel');
+const photoStudioRoutes = require('./routes/photoStudioRoutes');
+const PhotoStudioModel = require('./models/PhotoStudioModel');
+const imageUpscaleRoutes = require('./routes/imageUpscaleRoutes');
+const ImageUpscaleModel = require('./models/ImageUpscaleModel.js');
+const removeBackgroundRoutes = require('./routes/removeBackgroundRoutes');
+const RemoveBackgroundModel = require('./models/RemoveBackgroundModel.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,9 +49,11 @@ const PORT = process.env.PORT || 3000;
 initDatabase();
 const VideoGenerationModel = require('./models/VideoGenerationModel');
 
+
 cron.schedule('0 2 * * *', async () => {
   console.log('🗑️ Running cleanup job for old images and videos...');
   try {
+    // Existing model cleanups
     await Persona.deleteOldImages();
     await ProductPromotion.deleteOldImages();
     await VideoAI.deleteOldVideos();
@@ -65,7 +74,45 @@ cron.schedule('0 2 * * *', async () => {
     const deletedProducts = await photoProductModel.deleteExpired();
     console.log(`🗑️ Deleted ${deletedProducts} expired Photo Products`);
     
-    console.log('✅ Cleanup completed successfully');
+    // Cleanup expired Photo Studios
+    const photoStudioModel = new PhotoStudioModel(promisePool);
+    const deletedStudios = await photoStudioModel.deleteExpired();
+    console.log(`🗑️ Deleted ${deletedStudios} expired Photo Studios`);
+
+    // Cleanup expired Image Upscales
+    const imageUpscaleModel = new ImageUpscaleModel(promisePool);
+    const deletedUpscales = await imageUpscaleModel.deleteExpired();
+    console.log(`🗑️ Deleted ${deletedUpscales} expired Image Upscales`);
+
+    // Cleanup expired Remove Backgrounds
+    const removeBgModel = new RemoveBackgroundModel(promisePool);
+    const deletedBackgrounds = await removeBgModel.deleteExpired();
+    console.log(`🗑️ Deleted ${deletedBackgrounds} expired Remove Backgrounds`);
+    
+    // ✅ NEW: Cleanup expired Image Upscales (if installed)
+    if (typeof ImageUpscaleModel !== 'undefined') {
+      const imageUpscaleModel = new ImageUpscaleModel(promisePool);
+      const deletedUpscales = await imageUpscaleModel.deleteExpired();
+      console.log(`🗑️ Deleted ${deletedUpscales} expired Image Upscales`);
+    }
+    
+    // ✅ NEW: Cleanup expired Remove Backgrounds (if installed)
+    if (typeof RemoveBackgroundModel !== 'undefined') {
+      const removeBgModel = new RemoveBackgroundModel(promisePool);
+      const deletedBackgrounds = await removeBgModel.deleteExpired();
+      console.log(`🗑️ Deleted ${deletedBackgrounds} expired Remove Backgrounds`);
+    }
+    
+    // ============================================
+    // ✅ NEW: General file cleanup (2-day retention)
+    // ============================================
+    console.log('');
+    console.log('🧹 Running general file cleanup (2-day retention)...');
+    const uploadCleanup = await cleanupUploads();
+    console.log(`✅ Upload cleanup completed: ${uploadCleanup.filesDeleted} files deleted`);
+    
+    console.log('');
+    console.log('✅ All cleanup tasks completed successfully');
   } catch (error) {
     console.error('❌ Error during cleanup:', error);
   }
@@ -125,6 +172,9 @@ app.use('/api/product-idea', initProductIdeaRoutes(promisePool));
 app.use('/api/video-generation', videoGenerationRoutes(promisePool));
 app.use('/api/ai-influencer', aiInfluencerRoutes(promisePool));
 app.use('/api/photo-product', photoProductRoutes(promisePool));
+app.use('/api/photo-studio', photoStudioRoutes(promisePool));
+app.use('/api/image-upscale', imageUpscaleRoutes(promisePool));
+app.use('/api/remove-background', removeBackgroundRoutes(promisePool));
 
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
 
@@ -214,13 +264,62 @@ app.get('/ai-influencer-history', (req, res) => {
 app.get('/photo-product', (req, res) => {
   if (!req.session.userId) return res.redirect('/auth/login');
   res.render('photo-product', { 
-    user: req.session.user || { username: 'User', role: 'user' }
+    user: req.session.user || { username: 'User', role: 'user' },
+    userId: req.session.userId 
   });
 });
 
 app.get('/photo-product-history', (req, res) => {
   if (!req.session.userId) return res.redirect('/auth/login');
   res.render('photo-product-history', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/photo-studio', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('photo-studio', { 
+    user: req.session.user || { username: 'User', role: 'user' },
+    userId: req.session.userId 
+  });
+});
+
+// Photo Studio History page
+app.get('/photo-studio-history', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('photo-studio-history', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+// Image Upscale pages
+app.get('/image-upscale', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('image-upscale', { 
+    user: req.session.user || { username: 'User', role: 'user' },
+    userId: req.session.userId 
+  });
+});
+
+app.get('/image-upscale-history', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('image-upscale-history', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+// Remove Background pages
+app.get('/remove-background', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('remove-background', { 
+    user: req.session.user || { username: 'User', role: 'user' },
+    userId: req.session.userId 
+  });
+});
+
+app.get('/remove-background-history', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('remove-background-history', {
     user: req.session.user || { username: 'User', role: 'user' }
   });
 });
