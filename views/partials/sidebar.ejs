@@ -9,13 +9,14 @@
   :root {
     --sidebar-bg: linear-gradient(180deg, #1a1f36 0%, #0f1419 100%);
     --sidebar-width: 280px;
-    --primary: #667eea;
-    --primary-light: #7c8ff5;
-    --accent: #764ba2;
+    --primary: #D4AF37;
+    --primary-light: #E5C158;
+    --accent: #B8860B;
+    --bronze: #CD7F32;
     --text-primary: #ffffff;
     --text-secondary: #a0aec0;
-    --hover-bg: rgba(102, 126, 234, 0.15);
-    --active-bg: linear-gradient(90deg, rgba(102, 126, 234, 0.2) 0%, transparent 100%);
+    --hover-bg: rgba(212, 175, 55, 0.15);
+    --active-bg: linear-gradient(90deg, rgba(212, 175, 55, 0.2) 0%, transparent 100%);
     --border-color: rgba(255, 255, 255, 0.08);
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
@@ -55,7 +56,7 @@
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
     animation: rotate 20s linear infinite;
     pointer-events: none;
   }
@@ -75,16 +76,28 @@
     z-index: 1;
   }
 
+  .logo-container {
+    background: #ffffff;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .logo-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
+  }
+
   .brand-logo {
     height: 45px;
     width: auto;
-    filter: brightness(1.2) drop-shadow(0 2px 8px rgba(102, 126, 234, 0.3));
-    transition: transform 0.3s ease, filter 0.3s ease;
+    display: block;
+    transition: transform 0.3s ease;
   }
 
   .brand-logo:hover {
     transform: scale(1.05);
-    filter: brightness(1.4) drop-shadow(0 4px 12px rgba(102, 126, 234, 0.5));
   }
 
   .sidebar-nav {
@@ -105,12 +118,12 @@
   }
 
   .sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.5);
+    background: rgba(212, 175, 55, 0.5);
     border-radius: 4px;
   }
 
   .sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(102, 126, 234, 0.7);
+    background: rgba(212, 175, 55, 0.7);
   }
 
   .nav-section {
@@ -127,6 +140,7 @@
     opacity: 0.6;
   }
 
+  /* ===== NAV LINK (Parent & Regular) ===== */
   .nav-link {
     display: flex;
     align-items: center;
@@ -139,6 +153,7 @@
     margin: 0.25rem 0.75rem;
     border-radius: 12px;
     overflow: hidden;
+    cursor: pointer;
   }
 
   /* Hover glow effect */
@@ -149,7 +164,7 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
     transition: left 0.5s ease;
   }
 
@@ -161,14 +176,14 @@
     background: var(--hover-bg);
     color: var(--text-primary);
     transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
   }
 
   .nav-link.active {
     background: var(--active-bg);
     color: var(--text-primary);
     font-weight: 600;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
   }
 
   .nav-link.active::after {
@@ -181,7 +196,7 @@
     height: 60%;
     background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 100%);
     border-radius: 0 4px 4px 0;
-    box-shadow: 0 0 12px rgba(102, 126, 234, 0.6);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
   }
 
   .nav-icon {
@@ -192,6 +207,7 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.3s ease;
+    flex-shrink: 0;
   }
 
   .nav-link:hover .nav-icon {
@@ -199,16 +215,119 @@
   }
 
   .nav-link.active .nav-icon {
-    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.8));
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
   }
 
   .nav-text {
     font-size: 0.9375rem;
     font-weight: 500;
     letter-spacing: 0.01em;
+    flex: 1;
   }
 
-  /* Sidebar Footer */
+  /* ===== PARENT MENU WITH CHILDREN ===== */
+  .nav-item {
+    position: relative;
+  }
+
+  .nav-parent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Chevron Icon for Parent */
+  .nav-chevron {
+    font-size: 0.875rem;
+    transition: transform 0.3s ease;
+    color: var(--text-secondary);
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-link.has-children:hover .nav-chevron {
+    color: var(--text-primary);
+  }
+
+  .nav-link.has-children.open .nav-chevron {
+    transform: rotate(180deg);
+    color: var(--primary);
+  }
+
+  /* ===== SUBMENU (Children) ===== */
+  .nav-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0 0 12px 12px;
+    margin: 0 0.75rem 0.5rem;
+  }
+
+  .nav-submenu.open {
+    max-height: 500px;
+  }
+
+  .nav-submenu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem 0.75rem 3.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 0.875rem;
+  }
+
+  .nav-submenu-item::before {
+    content: '';
+    position: absolute;
+    left: 2rem;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+  }
+
+  .nav-submenu-item:hover {
+    color: var(--text-primary);
+    padding-left: 4rem;
+  }
+
+  .nav-submenu-item:hover::before {
+    background: var(--primary);
+    width: 8px;
+    height: 8px;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+  }
+
+  .nav-submenu-item.active {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .nav-submenu-item.active::before {
+    background: var(--primary);
+    width: 8px;
+    height: 8px;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+  }
+
+  .nav-submenu-icon {
+    font-size: 1.125rem;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== SIDEBAR FOOTER ===== */
   .sidebar-footer {
     padding: 1.5rem;
     border-top: 1px solid var(--border-color);
@@ -223,8 +342,8 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: rgba(102, 126, 234, 0.1);
-    border: 1px solid rgba(102, 126, 234, 0.2);
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 14px;
     margin-bottom: 1rem;
     transition: all 0.3s ease;
@@ -232,10 +351,10 @@
   }
 
   .user-info:hover {
-    background: rgba(102, 126, 234, 0.15);
-    border-color: rgba(102, 126, 234, 0.3);
+    background: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
   }
 
   .user-avatar {
@@ -249,14 +368,14 @@
     justify-content: center;
     font-weight: 700;
     font-size: 1rem;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
     border: 2px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
   }
 
   .user-info:hover .user-avatar {
     transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
   }
 
   .user-details {
@@ -365,12 +484,12 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.4);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .mobile-toggle:hover {
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+    box-shadow: 0 12px 32px rgba(212, 175, 55, 0.6);
     transform: scale(1.05);
   }
 
@@ -463,6 +582,22 @@
     body.sidebar-open {
       overflow: hidden;
     }
+
+    .logo-container {
+      padding: 0.75rem 1.25rem;
+    }
+
+    .brand-logo {
+      height: 38px;
+    }
+
+    .nav-submenu-item {
+      padding-left: 3rem;
+    }
+
+    .nav-submenu-item:hover {
+      padding-left: 3.5rem;
+    }
   }
 
   /* Tablet optimization */
@@ -496,9 +631,11 @@
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
-    <!-- Sidebar Header -->
+    <!-- Sidebar Header with White Background -->
     <div class="sidebar-header">
-      <img src="/logo.png" alt="SIJAGO AI+" class="brand-logo">
+      <div class="logo-container">
+        <img src="/logo.png" alt="SIJAGO AI+" class="brand-logo">
+      </div>
     </div>
 
     <!-- Sidebar Navigation -->
@@ -509,40 +646,104 @@
           <span class="nav-icon">🎯</span>
           <span class="nav-text">Cari Video Trending</span>
         </a>
+        
         <a href="/product-idea" class="nav-link <%= currentPage === 'product-idea' ? 'active' : '' %>">
           <span class="nav-icon">💡</span>
           <span class="nav-text">Product Idea</span>
         </a>
+        
         <a href="/video-prompting" class="nav-link <%= currentPage === 'video-prompting' ? 'active' : '' %>">
           <span class="nav-icon">🎬</span>
           <span class="nav-text">Prompting Video</span>
         </a>
-        <a href="/video-ai" class="nav-link <%= currentPage === 'video-ai' ? 'active' : '' %>">
+        
+        <a href="/video-generation" class="nav-link <%= currentPage === 'video-generation' ? 'active' : '' %>">
           <span class="nav-icon">🎞️</span>
           <span class="nav-text">Video Generator</span>
         </a>
+        
+        <a href="/video-ai" class="nav-link <%= currentPage === 'video-ai' ? 'active' : '' %>">
+          <span class="nav-icon">🎞️</span>
+          <span class="nav-text">Video Generator[Old]</span>
+        </a>
+        
         <a href="/video-ai2" class="nav-link <%= currentPage === 'video-ai2' ? 'active' : '' %>">
           <span class="nav-icon">🎥</span>
           <span class="nav-text">Video Generator (Custom)</span>
         </a>
-        <a href="/persona" class="nav-link <%= currentPage === 'persona' ? 'active' : '' %>">
+        
+        <a href="/ai-influencer" class="nav-link <%= currentPage === 'ai-influencer' ? 'active' : '' %>">
           <span class="nav-icon">✨</span>
           <span class="nav-text">AI Influencer Generator</span>
         </a>
-        <a href="/product-shot" class="nav-link <%= currentPage === 'product-shot' ? 'active' : '' %>">
-          <span class="nav-icon">📸</span>
-          <span class="nav-text">Product Shoot</span>
+        
+        <a href="/persona" class="nav-link <%= currentPage === 'persona' ? 'active' : '' %>">
+          <span class="nav-icon">✨</span>
+          <span class="nav-text">AI Influencer Generator[Old]</span>
         </a>
+        
+        <a href="/photo-product" class="nav-link <%= currentPage === 'photo-product' ? 'active' : '' %>">
+          <span class="nav-icon">📸</span>
+          <span class="nav-text">Photo Product</span>
+        </a>
+        
+        <!-- ===== PARENT MENU WITH SUBMENU (Example) ===== -->
+        <div class="nav-item">
+          <div class="nav-link has-children" onclick="toggleSubmenu(this)">
+            <span class="nav-icon">📸</span>
+            <span class="nav-text">Product Shoot</span>
+            <span class="nav-chevron">▼</span>
+          </div>
+          <div class="nav-submenu">
+            <a href="/product-shot" class="nav-submenu-item <%= currentPage === 'product-shot' ? 'active' : '' %>">
+              <span class="nav-submenu-icon">📷</span>
+              <span>Product Photography</span>
+            </a>
+            <a href="/product-studio" class="nav-submenu-item <%= currentPage === 'product-studio' ? 'active' : '' %>">
+              <span class="nav-submenu-icon">🎨</span>
+              <span>Studio Setup</span>
+            </a>
+            <a href="/product-editing" class="nav-submenu-item <%= currentPage === 'product-editing' ? 'active' : '' %>">
+              <span class="nav-submenu-icon">✂️</span>
+              <span>Photo Editing</span>
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Admin Section -->
       <% if (user.role === 'admin') { %>
       <div class="nav-section">
         <div class="nav-section-title">Admin Panel</div>
+        
+        <!-- Regular Admin Menu -->
         <a href="/users" class="nav-link <%= currentPage === 'users' ? 'active' : '' %>">
           <span class="nav-icon">👥</span>
           <span class="nav-text">User Management</span>
         </a>
+
+        <!-- Admin Menu with Submenu (Example) -->
+        <div class="nav-item">
+          <div class="nav-link has-children" onclick="toggleSubmenu(this)">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-text">Settings</span>
+            <span class="nav-chevron">▼</span>
+          </div>
+          <div class="nav-submenu">
+            <a href="/settings/general" class="nav-submenu-item <%= currentPage === 'settings-general' ? 'active' : '' %>">
+              <span class="nav-submenu-icon">🔧</span>
+              <span>General Settings</span>
+            </a>
+            <a href="/settings/api" class="nav-submenu-item <%= currentPage === 'settings-api' ? 'active' : '' %>">
+              <span class="nav-submenu-icon">🔑</span>
+              <span>API Configuration</span>
+            </a>
+            <a href="/settings/billing" class="nav-submenu-item <%= currentPage === 'settings-billing' ? 'active' : '' %>">
+              <span class="nav-submenu-icon">💳</span>
+              <span>Billing & Plans</span>
+            </a>
+          </div>
+        </div>
       </div>
       <% } %>
     </nav>
@@ -585,9 +786,54 @@
   mobileToggle.addEventListener('click', toggleSidebar);
   mobileOverlay.addEventListener('click', toggleSidebar);
 
+  // ===== SUBMENU TOGGLE FUNCTION =====
+  function toggleSubmenu(element) {
+    const submenu = element.nextElementSibling;
+    const isOpen = element.classList.contains('open');
+    
+    // Close all other submenus first
+    const allParents = document.querySelectorAll('.nav-link.has-children');
+    const allSubmenus = document.querySelectorAll('.nav-submenu');
+    
+    allParents.forEach(parent => {
+      if (parent !== element) {
+        parent.classList.remove('open');
+      }
+    });
+    
+    allSubmenus.forEach(sub => {
+      if (sub !== submenu) {
+        sub.classList.remove('open');
+      }
+    });
+    
+    // Toggle current submenu
+    if (isOpen) {
+      element.classList.remove('open');
+      submenu.classList.remove('open');
+    } else {
+      element.classList.add('open');
+      submenu.classList.add('open');
+    }
+  }
+
+  // Auto-open submenu if child is active
+  document.addEventListener('DOMContentLoaded', function() {
+    const activeSubmenuItem = document.querySelector('.nav-submenu-item.active');
+    if (activeSubmenuItem) {
+      const parentSubmenu = activeSubmenuItem.closest('.nav-submenu');
+      const parentLink = parentSubmenu.previousElementSibling;
+      
+      if (parentLink && parentLink.classList.contains('has-children')) {
+        parentLink.classList.add('open');
+        parentSubmenu.classList.add('open');
+      }
+    }
+  });
+
   // Close sidebar when clicking nav link on mobile
   if (window.innerWidth <= 768) {
-    const navLinks = document.querySelectorAll('.nav-link');
+    const navLinks = document.querySelectorAll('.nav-link:not(.has-children), .nav-submenu-item');
     navLinks.forEach(link => {
       link.addEventListener('click', () => {
         if (sidebar.classList.contains('mobile-open')) {

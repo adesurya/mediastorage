@@ -1,0 +1,569 @@
+<!-- views/ai-influencer.ejs -->
+<%- include('partials/sidebar', { currentPage: 'ai-influencer' }) %>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .ai-influencer-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 0.6s ease-out;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+  }
+
+  .main-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideUp 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #D4AF37 0%, #B8860B 100%);
+  }
+
+  .form-group {
+    margin-bottom: 2rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    font-size: 1rem;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    font-family: inherit;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .form-textarea {
+    min-height: 150px;
+    resize: vertical;
+    font-family: inherit;
+  }
+
+  .prompt-hint {
+    margin-top: 0.75rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFF4D6 100%);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    color: #B8860B;
+    border: 2px solid #F5E6C3;
+    line-height: 1.6;
+  }
+
+  .prompt-hint strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #9A7B0A;
+    font-size: 0.9375rem;
+  }
+
+  .prompt-hint-list {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .prompt-hint-list li {
+    margin-bottom: 0.25rem;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 1rem 2rem;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn:hover::before {
+    left: 100%;
+  }
+
+  .btn-optimize {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+  }
+
+  .btn-optimize:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(245, 158, 11, 0.4);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(107, 114, 128, 0.3);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .loading.active {
+    display: flex;
+  }
+
+  .loading-content {
+    background: white;
+    padding: 3rem 2.5rem;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .loading-content h3 {
+    margin-top: 1rem;
+    color: #1f2937;
+    font-size: 1.25rem;
+  }
+
+  .loading-content p {
+    color: #6b7280;
+    margin-top: 0.5rem;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #f3f4f6;
+    border-top: 5px solid #D4AF37;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  
+  @media (max-width: 768px) {
+    .ai-influencer-container {
+      padding: 1.5rem 1rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .page-subtitle {
+      font-size: 1rem;
+    }
+
+    .main-card {
+      padding: 1.75rem 1.25rem;
+      border-radius: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-input {
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    .form-textarea {
+      min-height: 120px;
+    }
+
+    .prompt-hint {
+      padding: 1rem;
+      font-size: 0.8125rem;
+    }
+
+    .button-group {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ai-influencer-container {
+      padding: 1rem 0.75rem;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+    }
+
+    .main-card {
+      padding: 1.5rem 1rem;
+      border-radius: 16px;
+    }
+
+    .form-label {
+      font-size: 0.9375rem;
+    }
+
+    .form-input {
+      padding: 0.8125rem 0.875rem;
+      font-size: 0.9rem;
+    }
+
+    .prompt-hint {
+      padding: 0.875rem;
+      font-size: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.8125rem 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .loading-content {
+      padding: 2rem 1.5rem;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .btn {
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<div class="ai-influencer-container">
+  <div class="page-header">
+    <h1 class="page-title">✨ AI Influencer Generator</h1>
+    <p class="page-subtitle">Buat AI influencer realistis dengan deskripsi Anda</p>
+  </div>
+
+  <div class="main-card">
+    <form id="influencerForm">
+      <!-- Name Input -->
+      <div class="form-group">
+        <label class="form-label" for="nameInput">Nama AI Influencer</label>
+        <input 
+          type="text" 
+          class="form-input" 
+          id="nameInput" 
+          placeholder="Contoh: Sarah, Budi, Maya..."
+          required
+        >
+      </div>
+
+      <!-- Prompt Input -->
+      <div class="form-group">
+        <label class="form-label" for="promptInput">Deskripsi AI Influencer</label>
+        <textarea 
+          class="form-input form-textarea" 
+          id="promptInput" 
+          placeholder="Deskripsikan AI influencer yang ingin Anda buat..."
+          required
+        ></textarea>
+
+        <div class="prompt-hint">
+          <strong>💡 Panduan Deskripsi:</strong>
+          <ul class="prompt-hint-list">
+            <li><strong>Jenis Kelamin:</strong> Pria, Wanita</li>
+            <li><strong>Umur:</strong> 20-an, 30-an, remaja, dewasa</li>
+            <li><strong>Tipe Wajah:</strong> Oval, bulat, persegi, hati</li>
+            <li><strong>Model Rambut:</strong> Panjang, pendek, keriting, lurus, warna</li>
+            <li><strong>Warna Kulit:</strong> Putih, sawo matang, cokelat, gelap</li>
+            <li><strong>Suku/Ras:</strong> Indonesia, Asia, Kaukasia, Afrika, dll</li>
+            <li><strong>Ciri Khusus:</strong> Mata, hidung, bibir, aksesoris</li>
+          </ul>
+        </div>
+
+
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/ai-influencer-history'">
+          📋 Lihat History
+        </button>
+        <button type="button" class="btn btn-optimize" id="optimizeBtn">
+          🚀 Optimize Prompt
+        </button>
+        <button type="submit" class="btn btn-primary" id="generateBtn">
+          ✨ Generate AI Influencer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading" id="loadingOverlay">
+  <div class="loading-content">
+    <div class="spinner"></div>
+    <h3 id="loadingTitle">Memproses...</h3>
+    <p id="loadingMessage">Mohon tunggu sebentar</p>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+  let optimizedPrompt = '';
+
+  // Optimize Prompt
+  document.getElementById('optimizeBtn').addEventListener('click', async function() {
+    const prompt = document.getElementById('promptInput').value.trim();
+    
+    if (!prompt) {
+      alert('Silakan isi deskripsi terlebih dahulu!');
+      return;
+    }
+
+    // Show loading
+    document.getElementById('loadingTitle').textContent = 'Mengoptimasi Prompt...';
+    document.getElementById('loadingMessage').textContent = 'AI sedang membuat prompt yang lebih baik';
+    document.getElementById('loadingOverlay').classList.add('active');
+
+    try {
+      const response = await fetch('/api/ai-influencer/optimize-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        optimizedPrompt = result.optimizedPrompt;
+        
+        // Replace textarea value dengan optimized prompt
+        document.getElementById('promptInput').value = optimizedPrompt;
+        
+        // Hide loading
+        document.getElementById('loadingOverlay').classList.remove('active');
+        
+        // Show warning pop-up
+        setTimeout(() => {
+          alert('⚠️ Sesuaikan kembali prompting yang SIJAGO AI+ sarankan dengan kebutuhan anda');
+        }, 300);
+      } else {
+        alert('❌ Gagal mengoptimasi prompt: ' + result.message);
+        document.getElementById('loadingOverlay').classList.remove('active');
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error.message);
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+  });
+
+  // Form Submission
+  document.getElementById('influencerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('nameInput').value.trim();
+    const promptValue = document.getElementById('promptInput').value.trim();
+
+    if (!name || !promptValue) {
+      alert('Nama dan deskripsi harus diisi!');
+      return;
+    }
+
+    // Use the current value in textarea (could be original or optimized)
+    const promptToUse = promptValue;
+
+    // Show loading
+    document.getElementById('loadingTitle').textContent = 'Membuat AI Influencer...';
+    document.getElementById('loadingMessage').textContent = 'Estimasi: 1-2 menit';
+    document.getElementById('loadingOverlay').classList.add('active');
+
+    try {
+      const response = await fetch('/api/ai-influencer/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          prompt: promptToUse
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('✅ AI Influencer generation dimulai! Cek hasil di History dalam 1-2 menit.');
+        window.location.href = '/ai-influencer-history';
+      } else {
+        alert('❌ Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error.message);
+    } finally {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+  });
+</script>

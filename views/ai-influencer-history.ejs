@@ -1,0 +1,621 @@
+<!-- views/ai-influencer-history.ejs -->
+<%- include('partials/sidebar', { currentPage: 'ai-influencer' }) %>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .history-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    gap: 1rem;
+    animation: fadeInDown 0.6s ease-out;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .btn-new {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    color: white;
+    padding: 0.875rem 1.75rem;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-new::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-new:hover::before {
+    left: 100%;
+  }
+
+  .btn-new:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+  }
+
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    animation: fadeIn 0.6s ease-out 0.2s both;
+  }
+
+  .influencer-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 2px solid transparent;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .influencer-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #D4AF37 0%, #B8860B 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .influencer-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .influencer-card:hover {
+    box-shadow: 0 20px 40px rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.3);
+    transform: translateY(-6px);
+  }
+
+  .card-image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    overflow: hidden;
+  }
+
+  .card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #9ca3af;
+  }
+
+  .card-placeholder-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-content {
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .status-pending {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #4b5563;
+  }
+
+  .status-optimizing,
+  .status-generating {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+  }
+
+  .status-completed {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+  }
+
+  .status-failed {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+  }
+
+  .card-date {
+    font-size: 0.8125rem;
+    color: #6b7280;
+  }
+
+  .card-prompt {
+    font-size: 0.875rem;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn-download {
+    flex: 1;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 0.625rem 1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .btn-download:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  }
+
+  .btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 0.625rem 1rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-delete:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  }
+
+  .expires-warning {
+    font-size: 0.75rem;
+    color: #dc2626;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: #6b7280;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .empty-icon {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .loading-spinner {
+    text-align: center;
+    padding: 4rem 2rem;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #f3f4f6;
+    border-top: 5px solid #D4AF37;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  .processing-info {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFF4D6 100%);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: #B8860B;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  
+  @media (max-width: 768px) {
+    .history-container {
+      padding: 1.5rem 1rem;
+    }
+
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+    }
+
+    .btn-new {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .history-grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .influencer-card {
+      border-radius: 16px;
+    }
+
+    .card-content {
+      padding: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+    }
+
+    .card-actions {
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+
+    .btn-download,
+    .btn-delete {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .history-container {
+      padding: 1rem 0.75rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .btn-new {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.9375rem;
+    }
+
+    .history-grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .card-content {
+      padding: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.0625rem;
+    }
+
+    .status-badge {
+      font-size: 0.6875rem;
+      padding: 0.3125rem 0.625rem;
+    }
+
+    .card-date {
+      font-size: 0.75rem;
+    }
+
+    .card-prompt {
+      font-size: 0.8125rem;
+    }
+
+    .btn-download,
+    .btn-delete {
+      padding: 0.5625rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    .empty-state {
+      padding: 3rem 1.5rem;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+    }
+
+    .empty-state h3 {
+      font-size: 1.25rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .page-title {
+      font-size: 1.375rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<div class="history-container">
+  <div class="page-header">
+    <h1 class="page-title">✨ AI Influencer History</h1>
+    <a href="/ai-influencer" class="btn-new">
+      ➕ Buat AI Influencer Baru
+    </a>
+  </div>
+
+  <div id="historyContent">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Loading history...</p>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+  let refreshInterval;
+
+  async function loadHistory() {
+    try {
+      const response = await fetch('/api/ai-influencer/history');
+      const result = await response.json();
+
+      if (result.success) {
+        renderHistory(result.data);
+      } else {
+        showError('Failed to load history');
+      }
+    } catch (error) {
+      showError(error.message);
+    }
+  }
+
+  function renderHistory(influencers) {
+    const container = document.getElementById('historyContent');
+
+    if (influencers.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✨</div>
+          <h3>Belum ada AI Influencer</h3>
+          <p>Mulai buat AI Influencer pertama Anda!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="history-grid">
+        ${influencers.map(inf => renderInfluencerCard(inf)).join('')}
+      </div>
+    `;
+  }
+
+  function renderInfluencerCard(inf) {
+    const statusClass = `status-${inf.status}`;
+    const statusText = {
+      'pending': '⏸️ Pending',
+      'optimizing': '🔄 Optimizing',
+      'generating': '⏳ Generating',
+      'completed': '✅ Completed',
+      'failed': '❌ Failed'
+    }[inf.status];
+
+    const expiresAt = new Date(inf.expires_at);
+    const now = new Date();
+    const hoursLeft = Math.floor((expiresAt - now) / (1000 * 60 * 60));
+
+    return `
+      <div class="influencer-card">
+        <div class="card-image-container">
+          ${inf.status === 'completed' && inf.image_url ? `
+            <img src="${inf.image_url}" alt="${inf.name}" class="card-image">
+          ` : `
+            <div class="card-placeholder">
+              <div class="card-placeholder-icon">
+                ${inf.status === 'generating' ? '⏳' : inf.status === 'failed' ? '❌' : '✨'}
+              </div>
+              <div>${statusText}</div>
+            </div>
+          `}
+        </div>
+
+        <div class="card-content">
+          <h3 class="card-title">${inf.name}</h3>
+          
+          <div class="card-meta">
+            <span class="status-badge ${statusClass}">${statusText}</span>
+            <span class="card-date">📅 ${new Date(inf.created_at).toLocaleDateString('id-ID')}</span>
+          </div>
+
+          <p class="card-prompt">${inf.optimized_prompt || inf.original_prompt}</p>
+
+          ${inf.status === 'completed' ? `
+            <div class="card-actions">
+              <a href="${inf.image_url}" download="sijagoai_${inf.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg" class="btn-download">
+                ⬇️ Download
+              </a>
+              <button class="btn-delete" onclick="deleteInfluencer(${inf.id})">
+                🗑️
+              </button>
+            </div>
+            ${hoursLeft > 0 ? `
+              <div class="expires-warning">
+                ⏰ Dihapus otomatis dalam ${hoursLeft} jam
+              </div>
+            ` : ''}
+          ` : inf.status === 'generating' ? `
+            <div class="processing-info">
+              ⏳ Estimasi selesai: 1-2 menit
+            </div>
+          ` : inf.status === 'failed' ? `
+            <div class="expires-warning">
+              ❌ ${inf.error_message || 'Generation failed'}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  async function deleteInfluencer(id) {
+    if (!confirm('Yakin ingin menghapus AI Influencer ini?')) return;
+
+    try {
+      const response = await fetch(`/api/ai-influencer/influencer/${id}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('✅ AI Influencer berhasil dihapus');
+        loadHistory();
+      } else {
+        alert('❌ ' + result.message);
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error.message);
+    }
+  }
+
+  function showError(message) {
+    document.getElementById('historyContent').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">❌</div>
+        <h3>Error</h3>
+        <p>${message}</p>
+      </div>
+    `;
+  }
+
+  // Initial load
+  loadHistory();
+
+  // Auto-refresh every 10 seconds if there are processing items
+  refreshInterval = setInterval(() => {
+    const processingCards = document.querySelectorAll('.status-generating, .status-optimizing, .status-pending');
+    if (processingCards.length > 0) {
+      loadHistory();
+    }
+  }, 10000);
+
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    clearInterval(refreshInterval);
+  });
+</script>

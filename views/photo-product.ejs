@@ -1,0 +1,780 @@
+<!-- views/photo-product.ejs -->
+<%- include('partials/sidebar', { currentPage: 'photo-product' }) %>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .photo-product-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 0.6s ease-out;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+  }
+
+  .main-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideUp 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #D4AF37 0%, #B8860B 100%);
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.75rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+    font-size: 1rem;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    font-family: inherit;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .form-textarea {
+    min-height: 150px;
+    resize: vertical;
+    font-family: inherit;
+  }
+
+  .prompt-hint {
+    margin-top: 0.75rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFF4D6 100%);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    color: #B8860B;
+    border: 2px solid #F5E6C3;
+    line-height: 1.7;
+  }
+
+  .prompt-hint strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #9A7B0A;
+    font-size: 0.9375rem;
+  }
+
+  .upload-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .upload-box {
+    border: 2px dashed #d1d5db;
+    border-radius: 16px;
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    position: relative;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-box:hover {
+    border-color: #D4AF37;
+    background: linear-gradient(135deg, #FFF9E6 0%, #FFF4D6 100%);
+    transform: scale(1.02);
+  }
+
+  .upload-box.has-file {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-style: solid;
+  }
+
+  .upload-box.required::after {
+    content: 'Required';
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 0.25rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .upload-box.optional::after {
+    content: 'Optional';
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    padding: 0.25rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .upload-title {
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .upload-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .preview-image {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 12px;
+    margin-top: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .remove-image {
+    margin-top: 0.75rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .remove-image:hover {
+    transform: scale(1.05);
+  }
+
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 1rem 2rem;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn:hover::before {
+    left: 100%;
+  }
+
+  .btn-optimize {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+  }
+
+  .btn-optimize:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(245, 158, 11, 0.4);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(212, 175, 55, 0.4);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(107, 114, 128, 0.3);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .loading.active {
+    display: flex;
+  }
+
+  .loading-content {
+    background: white;
+    padding: 3rem 2.5rem;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .loading-content h3 {
+    margin-top: 1rem;
+    color: #1f2937;
+    font-size: 1.25rem;
+  }
+
+  .loading-content p {
+    color: #6b7280;
+    margin-top: 0.5rem;
+  }
+
+  .spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #f3f4f6;
+    border-top: 5px solid #D4AF37;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ===== RESPONSIVE DESIGN ===== */
+  
+  @media (max-width: 768px) {
+    .photo-product-container {
+      padding: 1.5rem 1rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .page-subtitle {
+      font-size: 1rem;
+    }
+
+    .main-card {
+      padding: 1.75rem 1.25rem;
+      border-radius: 20px;
+    }
+
+    .upload-section {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .upload-box {
+      min-height: 220px;
+    }
+
+    .button-group {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .photo-product-container {
+      padding: 1rem 0.75rem;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+    }
+
+    .main-card {
+      padding: 1.5rem 1rem;
+      border-radius: 16px;
+    }
+
+    .section-title {
+      font-size: 1.0625rem;
+    }
+
+    .form-label {
+      font-size: 0.9375rem;
+    }
+
+    .form-input {
+      padding: 0.8125rem 0.875rem;
+      font-size: 0.9rem;
+    }
+
+    .upload-box {
+      padding: 1.5rem 0.875rem;
+      min-height: 200px;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+    }
+
+    .upload-title {
+      font-size: 0.9375rem;
+    }
+
+    .upload-text {
+      font-size: 0.8125rem;
+    }
+
+    .btn {
+      padding: 0.8125rem 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .loading-content {
+      padding: 2rem 1.5rem;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .btn {
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<div class="photo-product-container">
+  <div class="page-header">
+    <h1 class="page-title">📸 Photo Product Generator</h1>
+    <p class="page-subtitle">Edit dan tingkatkan foto produk Anda dengan AI</p>
+  </div>
+
+  <div class="main-card">
+    <form id="productForm" enctype="multipart/form-data">
+      <!-- Product Name -->
+      <div class="form-section">
+        <div class="section-title">
+          <span>📦</span>
+          <span>Informasi Produk</span>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="productNameInput">Nama Produk</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            id="productNameInput" 
+            placeholder="Contoh: Smartwatch Pro, Sepatu Running, dll..."
+            required
+          >
+        </div>
+      </div>
+
+      <!-- Image Uploads -->
+      <div class="form-section">
+        <div class="section-title">
+          <span>🖼️</span>
+          <span>Upload Gambar Produk</span>
+        </div>
+
+        <div class="upload-section">
+          <!-- Image 1 (Required) -->
+          <div class="upload-box required" id="uploadBox1" onclick="document.getElementById('image1Input').click()">
+            <input type="file" id="image1Input" name="image1" accept="image/*" style="display: none;" onchange="handleImageUpload(1, this)">
+            <div id="uploadContent1">
+              <span class="upload-icon">📷</span>
+              <div class="upload-title">Gambar 1 (Wajib)</div>
+              <div class="upload-text">Klik untuk upload gambar utama</div>
+            </div>
+          </div>
+
+          <!-- Image 2 (Optional) -->
+          <div class="upload-box optional" id="uploadBox2" onclick="document.getElementById('image2Input').click()">
+            <input type="file" id="image2Input" name="image2" accept="image/*" style="display: none;" onchange="handleImageUpload(2, this)">
+            <div id="uploadContent2">
+              <span class="upload-icon">📷</span>
+              <div class="upload-title">Gambar 2 (Opsional)</div>
+              <div class="upload-text">Klik untuk upload gambar tambahan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prompt Input -->
+      <div class="form-section">
+        <div class="section-title">
+          <span>✨</span>
+          <span>Deskripsi Editing</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="promptInput">Prompt Editing Photo</label>
+          <textarea 
+            class="form-input form-textarea" 
+            id="promptInput" 
+            placeholder="Deskripsikan bagaimana Anda ingin mengedit foto produk..."
+            required
+          ></textarea>
+
+          <div class="prompt-hint">
+            <strong>💡 Contoh Prompt yang Baik:</strong>
+            Close-up shot of hands holding product, product positioned at eye level, fingers naturally gripping the item, soft studio lighting highlighting product features, shallow depth of field with product in sharp focus, professional commercial photography, white/neutral background, bright and clean aesthetic
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="button-group">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/photo-product-history'">
+          📋 Lihat History
+        </button>
+        <button type="button" class="btn btn-optimize" id="optimizeBtn">
+          🚀 Optimize Prompt
+        </button>
+        <button type="submit" class="btn btn-primary" id="generateBtn">
+          ✨ Generate Photo Product
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading" id="loadingOverlay">
+  <div class="loading-content">
+    <div class="spinner"></div>
+    <h3 id="loadingTitle">Memproses...</h3>
+    <p id="loadingMessage">Mohon tunggu sebentar</p>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script>
+  let uploadedImages = {
+    image1: null,
+    image2: null
+  };
+
+  // Handle image upload
+  function handleImageUpload(imageNumber, input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('❌ File terlalu besar! Maksimal 10MB');
+      input.value = '';
+      return;
+    }
+
+    // Store file reference
+    uploadedImages[`image${imageNumber}`] = file;
+
+    // Preview image
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const uploadBox = document.getElementById(`uploadBox${imageNumber}`);
+      const uploadContent = document.getElementById(`uploadContent${imageNumber}`);
+      
+      uploadBox.classList.add('has-file');
+      uploadContent.innerHTML = `
+        <img src="${e.target.result}" alt="Preview" class="preview-image">
+        <button type="button" class="remove-image" onclick="removeImage(${imageNumber}, event)">
+          🗑️ Hapus
+        </button>
+      `;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Remove image
+  function removeImage(imageNumber, event) {
+    event.stopPropagation();
+    
+    uploadedImages[`image${imageNumber}`] = null;
+    document.getElementById(`image${imageNumber}Input`).value = '';
+    
+    const uploadBox = document.getElementById(`uploadBox${imageNumber}`);
+    const uploadContent = document.getElementById(`uploadContent${imageNumber}`);
+    
+    uploadBox.classList.remove('has-file');
+    
+    const isRequired = imageNumber === 1;
+    uploadContent.innerHTML = `
+      <span class="upload-icon">📷</span>
+      <div class="upload-title">Gambar ${imageNumber} (${isRequired ? 'Wajib' : 'Opsional'})</div>
+      <div class="upload-text">Klik untuk upload gambar ${isRequired ? 'utama' : 'tambahan'}</div>
+    `;
+  }
+
+  // Optimize Prompt
+  document.getElementById('optimizeBtn').addEventListener('click', async function() {
+    const prompt = document.getElementById('promptInput').value.trim();
+    
+    if (!prompt) {
+      alert('Silakan isi deskripsi editing terlebih dahulu!');
+      return;
+    }
+
+    // Show loading
+    document.getElementById('loadingTitle').textContent = 'Mengoptimasi Prompt...';
+    document.getElementById('loadingMessage').textContent = 'AI sedang membuat prompt yang lebih baik';
+    document.getElementById('loadingOverlay').classList.add('active');
+
+    try {
+      const response = await fetch('/api/photo-product/optimize-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Replace textarea value dengan optimized prompt
+        document.getElementById('promptInput').value = result.optimizedPrompt;
+        
+        // Hide loading
+        document.getElementById('loadingOverlay').classList.remove('active');
+        
+        // Show warning pop-up
+        setTimeout(() => {
+          alert('⚠️ Sesuaikan kembali prompting yang SIJAGO AI+ sarankan dengan kebutuhan anda');
+        }, 300);
+      } else {
+        alert('❌ Gagal mengoptimasi prompt: ' + result.message);
+        document.getElementById('loadingOverlay').classList.remove('active');
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error.message);
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+  });
+
+  // Form Submission
+  document.getElementById('productForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const productName = document.getElementById('productNameInput').value.trim();
+    const prompt = document.getElementById('promptInput').value.trim();
+
+    if (!productName || !prompt) {
+      alert('Nama produk dan deskripsi editing harus diisi!');
+      return;
+    }
+
+    if (!uploadedImages.image1) {
+      alert('Minimal upload 1 gambar!');
+      return;
+    }
+
+    // Show loading
+    document.getElementById('loadingTitle').textContent = 'Membuat Photo Product...';
+    document.getElementById('loadingMessage').textContent = 'Estimasi: 1-2 menit';
+    document.getElementById('loadingOverlay').classList.add('active');
+
+    try {
+      const formData = new FormData();
+      formData.append('productName', productName);
+      formData.append('prompt', prompt);
+      formData.append('image1', uploadedImages.image1);
+      
+      if (uploadedImages.image2) {
+        formData.append('image2', uploadedImages.image2);
+      }
+
+      const response = await fetch('/api/photo-product/generate', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('✅ Photo Product generation dimulai! Cek hasil di History dalam 1-2 menit.');
+        window.location.href = '/photo-product-history';
+      } else {
+        alert('❌ Error: ' + result.message);
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error.message);
+    } finally {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+  });
+</script>

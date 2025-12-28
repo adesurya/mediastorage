@@ -30,11 +30,17 @@ const productShotRoutes = require('./routes/productShotRoutes');
 const initTrendingVideoRoutes = require('./routes/trendingVideoRoutes');
 const initVideoPromptingRoutes = require('./routes/videoPromptingRoutes');
 const initProductIdeaRoutes = require('./routes/productIdeaRoutes');
+const videoGenerationRoutes = require('./routes/videoGenerationRoutes');
+const aiInfluencerRoutes = require('./routes/aiInfluencerRoutes');
+const AIInfluencerModel = require('./models/AIInfluencerModel');
+const photoProductRoutes = require('./routes/photoProductRoutes');
+const PhotoProductModel = require('./models/PhotoProductModel');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 initDatabase();
+const VideoGenerationModel = require('./models/VideoGenerationModel');
 
 cron.schedule('0 2 * * *', async () => {
   console.log('🗑️ Running cleanup job for old images and videos...');
@@ -43,6 +49,22 @@ cron.schedule('0 2 * * *', async () => {
     await ProductPromotion.deleteOldImages();
     await VideoAI.deleteOldVideos();
     await ProductShot.deleteOldImages();
+    
+    // Cleanup expired video generations
+    const videoGenModel = new VideoGenerationModel(promisePool);
+    const deletedVideos = await videoGenModel.deleteExpired();
+    console.log(`🗑️ Deleted ${deletedVideos} expired video generations`);
+    
+    // Cleanup expired AI Influencers
+    const aiInfluencerModel = new AIInfluencerModel(promisePool);
+    const deletedInfluencers = await aiInfluencerModel.deleteExpired();
+    console.log(`🗑️ Deleted ${deletedInfluencers} expired AI Influencers`);
+    
+    // Cleanup expired Photo Products
+    const photoProductModel = new PhotoProductModel(promisePool);
+    const deletedProducts = await photoProductModel.deleteExpired();
+    console.log(`🗑️ Deleted ${deletedProducts} expired Photo Products`);
+    
     console.log('✅ Cleanup completed successfully');
   } catch (error) {
     console.error('❌ Error during cleanup:', error);
@@ -100,6 +122,9 @@ app.use('/api/product-shot', productShotRoutes);
 app.use('/api/trending-videos', initTrendingVideoRoutes(promisePool));
 app.use('/api/video-prompting', initVideoPromptingRoutes(promisePool));
 app.use('/api/product-idea', initProductIdeaRoutes(promisePool));
+app.use('/api/video-generation', videoGenerationRoutes(promisePool));
+app.use('/api/ai-influencer', aiInfluencerRoutes(promisePool));
+app.use('/api/photo-product', photoProductRoutes(promisePool));
 
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
 
@@ -154,6 +179,48 @@ app.get('/product-idea', (req, res) => {
 app.get('/product-idea-result', (req, res) => {
   if (!req.session.userId) return res.redirect('/auth/login');
   res.render('product-idea-result', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/video-generation', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('video-generation', { 
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/video-generation-history', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('video-generation-history', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/ai-influencer', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('ai-influencer', { 
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/ai-influencer-history', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('ai-influencer-history', {
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/photo-product', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('photo-product', { 
+    user: req.session.user || { username: 'User', role: 'user' }
+  });
+});
+
+app.get('/photo-product-history', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('photo-product-history', {
     user: req.session.user || { username: 'User', role: 'user' }
   });
 });
