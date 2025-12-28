@@ -42,6 +42,8 @@ const imageUpscaleRoutes = require('./routes/imageUpscaleRoutes');
 const ImageUpscaleModel = require('./models/ImageUpscaleModel.js');
 const removeBackgroundRoutes = require('./routes/removeBackgroundRoutes');
 const RemoveBackgroundModel = require('./models/RemoveBackgroundModel.js');
+const videoCustomRoutes = require('./routes/videoCustomRoutes');
+const VideoCustomModel = require('./models/VideoCustomModel');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -89,6 +91,10 @@ cron.schedule('0 2 * * *', async () => {
     const deletedBackgrounds = await removeBgModel.deleteExpired();
     console.log(`🗑️ Deleted ${deletedBackgrounds} expired Remove Backgrounds`);
     
+    const videoCustomModel = new VideoCustomModel(promisePool);
+    const deletedCustomVideos = await videoCustomModel.deleteExpired();
+    console.log(`🗑️ Deleted ${deletedCustomVideos} expired Video Custom`);
+
     // ✅ NEW: Cleanup expired Image Upscales (if installed)
     if (typeof ImageUpscaleModel !== 'undefined') {
       const imageUpscaleModel = new ImageUpscaleModel(promisePool);
@@ -144,6 +150,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use('/css', express.static(path.join(__dirname, 'public/css')));
 app.use('/js', express.static(path.join(__dirname, 'public/js')));
 
+app.use('/uploads/video-custom/images', express.static(path.join(__dirname, 'uploads/video-custom/images')));
+app.use('/uploads/video-custom/audio', express.static(path.join(__dirname, 'uploads/video-custom/audio')));
+
 // Original routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
@@ -175,6 +184,7 @@ app.use('/api/photo-product', photoProductRoutes(promisePool));
 app.use('/api/photo-studio', photoStudioRoutes(promisePool));
 app.use('/api/image-upscale', imageUpscaleRoutes(promisePool));
 app.use('/api/remove-background', removeBackgroundRoutes(promisePool));
+app.use('/api/video-custom', videoCustomRoutes(promisePool));
 
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
 
@@ -322,6 +332,52 @@ app.get('/remove-background-history', (req, res) => {
   res.render('remove-background-history', {
     user: req.session.user || { username: 'User', role: 'user' }
   });
+});
+
+app.get('/video-custom', (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  res.render('video-custom', { 
+    user: req.session.user || { username: 'User', role: 'user' },
+    userId: req.session.userId,
+    currentPage: 'video-custom',  // ✅ Tambahkan ini
+    voices: [
+      { name: 'Moncus', voiceId: 'IfTf4aIKP5HWjtR9yPZ2' },
+      { name: 'Selina', voiceId: 'WQ4h6sgS9p2XXvLsESBT' },
+      { name: 'Citra', voiceId: 'RbNgJzKAV7jpYJNtCBpj' },
+      { name: 'Livna', voiceId: 'GdyFAZdMpKMBHw5pc1Bu' },
+      { name: 'Anjani', voiceId: '52LXmmR0nGnIcDs1TL3f' }
+    ]
+  });
+});
+
+
+app.get('/video-custom/history', async (req, res) => {
+  if (!req.session.userId) return res.redirect('/auth/login');
+  
+  try {
+    const VideoCustomModel = require('./models/VideoCustomModel');
+    const model = new VideoCustomModel(promisePool);
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = 20;
+    const offset = (page - 1) * limit;
+
+    const generations = await model.findByUserId(req.session.userId, limit, offset);
+    const total = await model.countByUserId(req.session.userId);
+    const totalPages = Math.ceil(total / limit);
+
+    res.render('video-custom-history', {
+      user: req.session.user || { username: 'User', role: 'user' },
+      currentPage: 'video-custom-history',
+      generations,
+      currentPageNum: page,
+      totalPages,
+      hasMore: page < totalPages
+    });
+  } catch (error) {
+    console.error('Error loading history:', error);
+    res.status(500).send('Error loading history');
+  }
 });
 
 app.use('/previews', (req, res, next) => {

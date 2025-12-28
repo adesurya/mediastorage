@@ -1,0 +1,454 @@
+// views/video-custom.ejs
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Generator Custom - SijagoAI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      color: #2d3748;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+      color: #718096;
+      font-size: 1rem;
+    }
+
+    .history-link {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .history-link:hover {
+      background: #5568d3;
+    }
+
+    .form-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      color: #2d3748;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .file-upload {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-upload input[type="file"] {
+      display: none;
+    }
+
+    .file-upload-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      border: 2px dashed #cbd5e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #f7fafc;
+    }
+
+    .file-upload-label:hover {
+      border-color: #667eea;
+      background: #edf2f7;
+    }
+
+    .file-upload-label.has-file {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+
+    .file-upload-content {
+      text-align: center;
+    }
+
+    .file-upload-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .file-upload-text {
+      color: #4a5568;
+      font-size: 0.875rem;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .preview-image.show {
+      display: block;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .info-box {
+      background: #ebf8ff;
+      border-left: 4px solid #3182ce;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-box p {
+      color: #2c5282;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .info-box p:last-child {
+      margin-bottom: 0;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert-success {
+      background: #f0fff4;
+      border: 1px solid #48bb78;
+      color: #22543d;
+    }
+
+    .alert-error {
+      background: #fff5f5;
+      border: 1px solid #fc8181;
+      color: #742a2a;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .voice-info {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      background: #f7fafc;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+
+    .voice-info-icon {
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+    }
+
+    .voice-info-text {
+      font-size: 0.875rem;
+      color: #4a5568;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar') %>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h3>Memproses Video...</h3>
+      <p>Mohon tunggu 1-2 menit. Jangan tutup halaman ini.</p>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <h1>🎥 Video Generator Custom</h1>
+        <p>Buat video dengan narasi suara AI yang dipersonalisasi</p>
+        <a href="/video-custom/history" class="history-link">📜 Lihat History</a>
+      </div>
+
+      <div class="alert alert-success" id="successAlert"></div>
+      <div class="alert alert-error" id="errorAlert"></div>
+
+      <div class="form-card">
+        <div class="info-box">
+          <p><strong>ℹ️ Cara Penggunaan:</strong></p>
+          <p>1. Upload gambar yang ingin dijadikan video</p>
+          <p>2. Masukkan prompt untuk gerakan video</p>
+          <p>3. Tulis narasi yang akan dibacakan</p>
+          <p>4. Pilih suara AI favorit Anda</p>
+          <p>5. Klik Generate dan tunggu 1-2 menit</p>
+        </div>
+
+        <form id="videoForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label>Judul Video *</label>
+            <input type="text" name="title" id="title" required placeholder="Contoh: Video Produk Kopi Premium">
+          </div>
+
+          <div class="form-group">
+            <label>Upload Gambar *</label>
+            <div class="file-upload">
+              <input type="file" id="imageInput" name="image" accept="image/*" required>
+              <label for="imageInput" class="file-upload-label" id="uploadLabel">
+                <div class="file-upload-content">
+                  <div class="file-upload-icon">📁</div>
+                  <div class="file-upload-text">
+                    <strong>Klik untuk upload gambar</strong><br>
+                    <span>Maksimal 10MB (JPG, PNG, WEBP)</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+            <img id="imagePreview" class="preview-image" alt="Preview">
+          </div>
+
+          <div class="form-group">
+            <label>Prompt Video *</label>
+            <textarea name="video_prompt" id="videoPrompt" required placeholder="Contoh: A cinematic close-up of coffee being poured into a cup, steam rising, warm lighting, professional product shot"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Narasi (Text to Speech) *</label>
+            <textarea name="narration_text" id="narrationText" required placeholder="Contoh: Nikmati kelezatan kopi premium pilihan terbaik. Setiap tegukan memberikan pengalaman yang tak terlupakan."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Pilih Suara *</label>
+            <select name="voice_id" id="voiceSelect" required>
+              <option value="">-- Pilih Suara --</option>
+              <% voices.forEach(voice => { %>
+                <option value="<%= voice.voiceId %>"><%= voice.name %></option>
+              <% }); %>
+            </select>
+            <div class="voice-info">
+              <span class="voice-info-icon">🎤</span>
+              <span class="voice-info-text">Pilih suara AI yang sesuai dengan brand Anda</span>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">
+            🚀 Generate Video
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const uploadLabel = document.getElementById('uploadLabel');
+    const imagePreview = document.getElementById('imagePreview');
+    const videoForm = document.getElementById('videoForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const successAlert = document.getElementById('successAlert');
+    const errorAlert = document.getElementById('errorAlert');
+
+    // Image preview
+    imageInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        uploadLabel.classList.add('has-file');
+        uploadLabel.querySelector('.file-upload-text').innerHTML = 
+          `<strong>✓ ${file.name}</strong><br><span>Klik untuk ganti gambar</span>`;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          imagePreview.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Form submission
+    videoForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      successAlert.classList.remove('show');
+      errorAlert.classList.remove('show');
+
+      const formData = new FormData(videoForm);
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Memproses...';
+      loadingOverlay.classList.add('show');
+
+      try {
+        const response = await fetch('/api/video-custom/create', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          successAlert.textContent = data.message;
+          successAlert.classList.add('show');
+          
+          // Redirect to history after 2 seconds
+          setTimeout(() => {
+            window.location.href = '/video-custom/history';
+          }, 2000);
+        } else {
+          throw new Error(data.error || 'Generation failed');
+        }
+
+      } catch (error) {
+        errorAlert.textContent = error.message;
+        errorAlert.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🚀 Generate Video';
+        loadingOverlay.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>

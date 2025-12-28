@@ -1,0 +1,675 @@
+// views/video-custom-history.ejs
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History Video Custom - SijagoAI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .main-content {
+      margin-left: 280px;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .page-header h1 {
+      color: #2d3748;
+      font-size: 2rem;
+    }
+
+    .create-btn {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+
+    .create-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .generations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .generations-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .generation-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .generation-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+
+    .card-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: #f7fafc;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      font-size: 0.875rem;
+      color: #718096;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-generating_video {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-generating_audio {
+      background: #e0e7ff;
+      color: #4338ca;
+    }
+
+    .status-syncing {
+      background: #fce7f3;
+      color: #9f1239;
+    }
+
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-failed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .progress-container {
+      margin: 1rem 0;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      font-size: 0.875rem;
+      color: #4a5568;
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #5568d3;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #2d3748;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #cbd5e0;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .empty-state {
+      background: white;
+      padding: 4rem 2rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h2 {
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: #718096;
+      margin-bottom: 2rem;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    .pagination a {
+      padding: 0.5rem 1rem;
+      background: white;
+      color: #667eea;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .pagination a:hover {
+      background: #edf2f7;
+    }
+
+    .pagination a.active {
+      background: #667eea;
+      color: white;
+    }
+
+    .video-player {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .refresh-btn {
+      background: #48bb78;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .refresh-btn:hover {
+      background: #38a169;
+    }
+
+    .process-log-container {
+  margin-top: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f7fafc;
+}
+
+.process-log-header {
+  padding: 0.75rem 1rem;
+  background: #edf2f7;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: #2d3748;
+  user-select: none;
+  transition: background 0.3s;
+}
+
+.process-log-header:hover {
+  background: #e2e8f0;
+}
+
+.log-toggle {
+  font-size: 0.75rem;
+  transition: transform 0.3s;
+}
+
+.process-log-header.open .log-toggle {
+  transform: rotate(180deg);
+}
+
+.process-log-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.process-log-content.open {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.process-log-content pre {
+  margin: 0;
+  padding: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #2d3748;
+  background: white;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.process-log-content pre::-webkit-scrollbar {
+  width: 8px;
+}
+
+.process-log-content pre::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.process-log-content pre::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.process-log-content pre::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+  </style>
+</head>
+<body>
+  <%- include('partials/sidebar') %>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <h1>📜 History Video Custom</h1>
+        <a href="/video-custom" class="create-btn">➕ Buat Video Baru</a>
+      </div>
+
+      <% if (generations.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-state-icon">📹</div>
+          <h2>Belum Ada Video</h2>
+          <p>Mulai buat video custom pertama Anda dengan AI</p>
+          <a href="/video-custom" class="create-btn">Buat Video Sekarang</a>
+        </div>
+      <% } else { %>
+        <div class="generations-grid">
+          <% generations.forEach(gen => { %>
+            <div class="generation-card" data-id="<%= gen.id %>">
+              <img src="<%= gen.image_url %>" alt="<%= gen.title %>" class="card-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'200\'%3E%3Crect fill=\'%23f7fafc\' width=\'400\' height=\'200\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%234a5568\' font-size=\'16\'%3ENo Image%3C/text%3E%3C/svg%3E'">
+              
+              <div class="card-body">
+  <h3 class="card-title"><%= gen.title %></h3>
+  
+  <div class="card-meta">
+    <span class="meta-item">🎤 <%= gen.voice_name %></span>
+    <span class="meta-item">📅 <%= new Date(gen.created_at).toLocaleDateString('id-ID') %></span>
+  </div>
+
+  <span class="status-badge status-<%= gen.status %>">
+    <%= gen.status.replace(/_/g, ' ') %>
+  </span>
+
+  <% if (gen.status !== 'completed' && gen.status !== 'failed') { %>
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: <%= 
+          gen.status === 'pending' ? '10' :
+          gen.status === 'generating_video' || gen.status === 'generating_audio' ? '40' :
+          gen.status === 'syncing' ? '80' : '0'
+        %>%"></div>
+      </div>
+      <div class="progress-text">
+        <span>
+          <% if (gen.status === 'generating_video' || gen.status === 'generating_audio') { %>
+            Generating... (1-2 menit)
+          <% } else if (gen.status === 'syncing') { %>
+            Syncing video & audio...
+          <% } else { %>
+            Dalam antrian...
+          <% } %>
+        </span>
+        <span>
+          <%= 
+            gen.status === 'pending' ? '10' :
+            gen.status === 'generating_video' || gen.status === 'generating_audio' ? '40' :
+            gen.status === 'syncing' ? '80' : '0'
+          %>%
+        </span>
+      </div>
+
+      <!-- ✅ BARU: Process Log Display -->
+      <% if (gen.process_log) { %>
+        <div class="process-log-container">
+          <div class="process-log-header" onclick="toggleLog(this)">
+            📋 Process Log <span class="log-toggle">▼</span>
+          </div>
+          <div class="process-log-content">
+            <pre><%= gen.process_log %></pre>
+          </div>
+        </div>
+      <% } %>
+
+      <button class="refresh-btn" onclick="refreshStatus(<%= gen.id %>)">🔄 Refresh</button>
+    </div>
+  <% } %>
+
+  <% if (gen.status === 'completed' && gen.final_video_url) { %>
+    <video class="video-player" controls>
+      <source src="<%= gen.final_video_url %>" type="video/mp4">
+      Browser Anda tidak mendukung video player.
+    </video>
+    
+    <div class="card-actions">
+      <a href="/api/video-custom/download/<%= gen.id %>" class="btn btn-primary" download>
+        ⬇️ Download
+      </a>
+    </div>
+    
+    <% if (gen.cost_time) { %>
+      <div class="meta-item" style="margin-top: 0.5rem;">
+        ⏱️ Waktu: <%= gen.cost_time %> detik
+      </div>
+    <% } %>
+
+    <!-- ✅ Process Log untuk completed -->
+    <% if (gen.process_log) { %>
+      <div class="process-log-container">
+        <div class="process-log-header" onclick="toggleLog(this)">
+          📋 Process Log <span class="log-toggle">▼</span>
+        </div>
+        <div class="process-log-content">
+          <pre><%= gen.process_log %></pre>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+
+  <% if (gen.status === 'failed') { %>
+    <div class="error-message">
+      ❌ <%= gen.error_message || 'Generation failed' %>
+    </div>
+
+    <!-- ✅ Process Log untuk failed -->
+    <% if (gen.process_log) { %>
+      <div class="process-log-container">
+        <div class="process-log-header" onclick="toggleLog(this)">
+          📋 Process Log <span class="log-toggle">▼</span>
+        </div>
+        <div class="process-log-content">
+          <pre><%= gen.process_log %></pre>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+</div>
+            </div>
+          <% }); %>
+        </div>
+
+        <% if (totalPages > 1) { %>
+          <div class="pagination">
+            <% if (currentPageNum > 1) { %>
+              <a href="?page=<%= currentPageNum - 1 %>">← Previous</a>
+            <% } %>
+            
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <a href="?page=<%= i %>" class="<%= i === currentPageNum ? 'active' : '' %>">
+                <%= i %>
+              </a>
+            <% } %>
+            
+            <% if (currentPageNum < totalPages) { %>
+              <a href="?page=<%= currentPageNum + 1 %>">Next →</a>
+            <% } %>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    // Auto-refresh untuk item yang sedang processing
+    const processingCards = document.querySelectorAll('.generation-card');
+    const processingIds = [];
+
+    processingCards.forEach(card => {
+      const statusBadge = card.querySelector('.status-badge');
+      const status = statusBadge.textContent.trim().toLowerCase();
+      
+      if (!status.includes('completed') && !status.includes('failed')) {
+        const id = card.dataset.id;
+        processingIds.push(id);
+      }
+    });
+
+    if (processingIds.length > 0) {
+      setInterval(() => {
+        processingIds.forEach(checkStatus);
+      }, 10000); // Check every 10 seconds
+    }
+
+    async function checkStatus(id) {
+      try {
+        const response = await fetch(`/api/video-custom/status/${id}`);
+        const data = await response.json();
+
+        if (data.status === 'completed' || data.status === 'failed') {
+          location.reload();
+        }
+      } catch (error) {
+        console.error('Status check error:', error);
+      }
+    }
+
+    async function refreshStatus(id) {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '⏳ Loading...';
+
+      try {
+        const response = await fetch(`/video-custom/status/${id}`);
+        const data = await response.json();
+
+        if (data.status === 'completed' || data.status === 'failed') {
+          location.reload();
+        } else {
+          btn.textContent = '✓ Updated';
+          setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = '🔄 Refresh';
+          }, 2000);
+        }
+      } catch (error) {
+        btn.textContent = '❌ Error';
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = '🔄 Refresh';
+        }, 2000);
+      }
+    }
+    // Toggle process log
+function toggleLog(element) {
+  const content = element.nextElementSibling;
+  const isOpen = element.classList.contains('open');
+  
+  if (isOpen) {
+    element.classList.remove('open');
+    content.classList.remove('open');
+  } else {
+    element.classList.add('open');
+    content.classList.add('open');
+  }
+}
+
+// Update auto-refresh untuk update process log juga
+async function checkStatus(id) {
+  try {
+    const response = await fetch(`/api/video-custom/status/${id}`);
+    const data = await response.json();
+
+    // ✅ Update process log di card
+    const card = document.querySelector(`.generation-card[data-id="${id}"]`);
+    if (card && data.process_log) {
+      const logContent = card.querySelector('.process-log-content pre');
+      if (logContent) {
+        logContent.textContent = data.process_log;
+      }
+    }
+
+    if (data.status === 'completed' || data.status === 'failed') {
+      location.reload();
+    }
+  } catch (error) {
+    console.error('Status check error:', error);
+  }
+}
+
+async function refreshStatus(id) {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '⏳ Loading...';
+
+  try {
+    const response = await fetch(`/api/video-custom/status/${id}`);
+    const data = await response.json();
+
+    // ✅ Update process log
+    const card = document.querySelector(`.generation-card[data-id="${id}"]`);
+    if (card && data.process_log) {
+      const logContent = card.querySelector('.process-log-content pre');
+      if (logContent) {
+        logContent.textContent = data.process_log;
+      }
+    }
+
+    if (data.status === 'completed' || data.status === 'failed') {
+      location.reload();
+    } else {
+      btn.textContent = '✓ Updated';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '🔄 Refresh';
+      }, 2000);
+    }
+  } catch (error) {
+    btn.textContent = '❌ Error';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '🔄 Refresh';
+    }, 2000);
+  }
+}
+  </script>
+</body>
+</html>
