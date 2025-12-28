@@ -1,42 +1,25 @@
-# SIJAGO+ AI Application
+1. Result dari setiap endpoint ai generator tidak bisa dibuka. ada yang diarahkan ke path dari imgbb. pastikan result nya kembali dengan betul
+2. Menu untuk melihat history semua process dardi user
+3. view video-generation, video-generation-history, ai-influencer, ai-influencer-history, photo-studio, photo-studio-history, photo-product, photo-product-history, image-upscale, image-upscale-history, remove-background, remove-background-history pada tampilan title tidak ada nama product
+4. favicon tidak terload ketika page dibuja
+5. terdapat error Uncaught SyntaxError: Identifier 'mobileToggle' has already been declared pada setiap page doatas
+6. tambahkan meta-og, twitter card share, facebook share preview
+Saya juga ingin merubah seluruh service yang menggunakan imgbb ke local seperti video-custom
 
-Aplikasi Full Stack untuk manajemen SIJAGO+ AI dengan user management menggunakan Node.js, Express, MySQL, dan EJS.
+Hard Tuning
+High Priority:
+Input Validation (mencegah bad data)
+Error Handling & Logging (debugging lebih mudah)
+Rate Limiting (security)
 
-## Fitur Utama
 
-### 1. User Management (Admin Only)
-- ✅ Create, Read, Update, Delete users
-- ✅ Role-based access control (Admin & User)
-- ✅ Password encryption dengan bcrypt
-- ✅ Email dan username validation
+Medium Priority:
+BaseModel & Query Builder (reduce code duplication)
+Caching Layer (performance)
+API Retry Logic (reliability)
 
-### 2. Media Upload & Management
-- ✅ Upload file (semua jenis file)
-- ✅ View uploaded files
-- ✅ Delete files
-- ✅ Public URL untuk setiap file
-- ✅ **CORS enabled** - file dapat diakses dari mana saja
-- ✅ File preview untuk gambar
-- ✅ File size tracking
 
-### 3. Authentication & Security
-- ✅ Session-based authentication
-- ✅ JWT token support untuk API
-- ✅ Role-based middleware
-- ✅ Password hashing
-- ✅ Protected routes
-
-## Instalasi
-
-### Prerequisites
-- Node.js (v14 atau lebih baru)
-- MySQL (v5.7 atau lebih baru)
-- npm atau yarn
-
-### Langkah Instalasi
-
-1. **Clone atau download project**
-```bash
-mkdir media-storage-app
-cd media-storage-app
-
+Low Priority (Nice to have):
+Job Queue (scalability)
+Testing (long-term maintenance)
+Advanced monitoring
